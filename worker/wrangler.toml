@@ -1,0 +1,33 @@
+name = "ggsnake-api"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+workers_dev = true
+
+[observability]
+enabled = true
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ggsnake"
+database_id = "REPLACE_WITH_D1_DATABASE_ID"
+
+[vars]
+APP_URL = "https://bliawrk0029.github.io/GGSNAKE/"
+ALLOWED_ORIGIN = "https://bliawrk0029.github.io"
+BOT_USERNAME = "ggsnake_game_bot"
+APP_SHORT_NAME = "play"
+# Contest settings (UTC). Change the end date before launch.
+CONTEST_END = "2026-10-31T18:00:00Z"
+PRIZE_POOL = "1000"
+PRIZE_CURRENCY = "USDT"
+PRIZES_SCORE = "300,150,75,40,35"
+PRIZES_REF = "200,100,50,25,25"
+REF_MIN_GAMES = "3"
+REF_MIN_SCORE = "50"
+MAX_GAMES_PER_DAY = "500"
+INITDATA_MAX_AGE = "86400"
+
+# Secrets — set in the Cloudflare dashboard (Settings → Variables and Secrets), never in this file:
+#   BOT_TOKEN       token from @BotFather
+#   ADMIN_KEY       long random string for /admin/* endpoints
+#   WEBHOOK_SECRET  random string Telegram sends with every bot update

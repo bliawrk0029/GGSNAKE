@@ -3,23 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#0a0e13">
 <title>GGSNAKE</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=Unbounded:wght@600;800&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Unbounded:wght@700;900&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<script src="engine.js"></script>
 <style>
 :root {
     --vh: 100vh;
-    --bg: #0b0f14;
-    --surface: #141a22;
-    --surface-2: #1b232e;
-    --line: #253041;
-    --text: #e8eef5;
-    --muted: #8794a6;
+    --bg: #0a0e13;
+    --surface: rgba(20, 27, 36, .82);
+    --surface-solid: #141b24;
+    --surface-2: #1c2531;
+    --line: #26313f;
+    --text: #edf2f7;
+    --muted: #8b98aa;
     --accent: #b8f34a;
-    --accent-ink: #1a2606;
-    --danger: #ff5d5d;
-    /* LCD theme (changed from Profile) */
+    --accent-ink: #172204;
+    --accent-dim: rgba(184, 243, 74, .14);
+    --gold: #ffd25a;
+    --silver: #cfd8e3;
+    --bronze: #e0a06a;
+    --danger: #ff6464;
     --lcd: #b9c9a0;
     --ink: #1f2a16;
 }
@@ -31,15 +38,25 @@ html, body {
     height: var(--vh);
     overflow: hidden;
     overscroll-behavior: none;
-    background: var(--bg);
     color: var(--text);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    font-family: "Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
     user-select: none;
     -webkit-user-select: none;
     touch-action: none;
 }
 
+/* Background: soft glows + a faint pixel grid */
+body {
+    background:
+        radial-gradient(60% 40% at 15% 0%, rgba(184, 243, 74, .10) 0%, transparent 70%),
+        radial-gradient(50% 35% at 100% 100%, rgba(64, 196, 255, .08) 0%, transparent 70%),
+        radial-gradient(rgba(255, 255, 255, .045) 1px, transparent 1.2px) 0 0 / 18px 18px,
+        var(--bg);
+}
+
 .app {
+    position: relative;
     height: 100%;
     max-width: 480px;
     margin: 0 auto;
@@ -48,300 +65,212 @@ html, body {
     padding-top: env(safe-area-inset-top);
 }
 
+button { font: inherit; color: inherit; border: 0; background: none; padding: 0; cursor: pointer; touch-action: manipulation; }
+
 /* ---------- Header ---------- */
-.top {
-    flex: 0 0 auto;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 10px 14px 8px;
-}
-.logo {
-    font-family: "Unbounded", system-ui, sans-serif;
-    font-weight: 800;
-    font-size: 18px;
-    letter-spacing: .04em;
-}
+.top { flex: 0 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px 8px; }
+.logo { font-family: "Unbounded", sans-serif; font-weight: 900; font-size: 19px; letter-spacing: .02em; }
 .logo span { color: var(--accent); }
-.chip {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    padding: 5px 10px 5px 8px;
-    border-radius: 999px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    font-family: "VT323", monospace;
-    font-size: 20px;
-    line-height: 1;
+.prize-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 12px 6px 8px; border-radius: 999px;
+    background: linear-gradient(90deg, rgba(255, 210, 90, .16), rgba(184, 243, 74, .12));
+    border: 1px solid rgba(255, 210, 90, .35);
+    font-weight: 800; font-size: 13px;
 }
-.chip svg { width: 16px; height: 16px; color: var(--accent); }
+.prize-chip .cup { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--gold); color: #3a2a00; }
+.prize-chip .cup svg { width: 14px; height: 14px; }
+.prize-chip small { font-family: "VT323", monospace; font-size: 18px; font-weight: 400; color: var(--muted); }
 
 /* ---------- Tabs ---------- */
 main { flex: 1; min-height: 0; position: relative; }
 .tab { position: absolute; inset: 0; display: none; }
 .tab.active { display: flex; }
-.tab.scroll {
-    flex-direction: column;
-    gap: 12px;
-    overflow-y: auto;
-    padding: 4px 14px 20px;
-    touch-action: pan-y;
-    -webkit-overflow-scrolling: touch;
-}
+.tab.scroll > * { flex-shrink: 0; }
+.tab.scroll { flex-direction: column; gap: 12px; overflow-y: auto; padding: 4px 14px 24px; touch-action: pan-y; -webkit-overflow-scrolling: touch; }
 
-/* ---------- Game tab ---------- */
+/* ---------- Game ---------- */
 #tab-game { flex-direction: column; padding: 0 10px 10px; }
-
 .device {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    padding: 8px;
-    border-radius: 22px;
-    background: linear-gradient(180deg, #1d2633 0%, #121821 100%);
+    flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 8px;
+    border-radius: 22px; background: linear-gradient(180deg, #1c2633 0%, #111821 100%);
     border: 1px solid var(--line);
-    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 10px 30px rgba(0,0,0,.45);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .06), 0 14px 40px rgba(0, 0, 0, .5);
 }
-
 .lcd {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    padding: 6px 8px;
-    border-radius: 14px;
-    background: var(--lcd);
-    color: var(--ink);
+    flex: 1; min-height: 0; display: flex; flex-direction: column; padding: 6px 8px;
+    border-radius: 14px; background: var(--lcd); color: var(--ink);
     font-family: "VT323", monospace;
-    box-shadow: inset 0 0 22px rgba(0,0,0,.3);
-    position: relative;
-    overflow: hidden;
-    transition: background .2s;
+    box-shadow: inset 0 0 22px rgba(0, 0, 0, .3);
+    position: relative; overflow: hidden; transition: background .2s;
 }
-.lcd::after {
-    content: "";
-    position: absolute; inset: 0;
-    background: linear-gradient(165deg, rgba(255,255,255,.14) 0%, transparent 30%);
-    pointer-events: none;
-}
-.hud {
-    flex: 0 0 auto;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 21px;
-    line-height: 1;
-    padding: 0 2px;
-}
+.lcd::after { content: ""; position: absolute; inset: 0; background: linear-gradient(165deg, rgba(255, 255, 255, .14) 0%, transparent 30%); pointer-events: none; }
+.hud { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 22px; line-height: 1; padding: 0 2px; }
 .hud.bottom { font-size: 18px; opacity: .85; }
-.stage {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 0;
-}
+.stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 4px 0; }
 #game { display: block; touch-action: none; }
 
-/* ---------- Controls ---------- */
-.controls {
-    flex: 0 0 auto;
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    align-items: center;
-    padding: 12px 6px 2px;
-}
+.controls { flex: 0 0 auto; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 12px 6px 2px; }
 .controls.hidden { display: none; }
-
 .side { display: flex; flex-direction: column; align-items: center; gap: 6px; }
-.side small { font-size: 11px; color: var(--muted); font-weight: 600; letter-spacing: .04em; }
-
-button {
-    font: inherit;
-    color: inherit;
-    border: 0;
-    background: none;
-    padding: 0;
-    cursor: pointer;
-    touch-action: manipulation;
-}
-
+.side small { font-size: 11px; color: var(--muted); font-weight: 700; letter-spacing: .05em; }
 .round {
-    width: 56px; height: 56px;
-    border-radius: 50%;
-    display: grid;
-    place-items: center;
-    background: var(--surface-2);
-    border: 1px solid var(--line);
-    box-shadow: 0 4px 0 #0a0d12;
+    width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+    background: var(--surface-2); border: 1px solid var(--line); box-shadow: 0 4px 0 #080b0f;
     transition: transform .05s, box-shadow .05s;
 }
 .round svg { width: 24px; height: 24px; }
 .round.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; box-shadow: 0 4px 0 #6f9a1f; }
-
 .dpad {
-    position: relative;
-    width: clamp(132px, 20vh, 168px);
-    aspect-ratio: 1;
-    border-radius: 50%;
+    position: relative; width: clamp(132px, 20vh, 168px); aspect-ratio: 1; border-radius: 50%;
     background: radial-gradient(circle at 50% 40%, #222c39 0%, #161d27 70%);
-    border: 1px solid var(--line);
-    box-shadow: inset 0 2px 0 rgba(255,255,255,.05), 0 6px 16px rgba(0,0,0,.4);
+    border: 1px solid var(--line); box-shadow: inset 0 2px 0 rgba(255, 255, 255, .05), 0 6px 16px rgba(0, 0, 0, .4);
 }
 .dp {
-    position: absolute;
-    width: 34%; height: 34%;
-    display: grid;
-    place-items: center;
-    border-radius: 14px;
-    background: var(--surface-2);
-    border: 1px solid var(--line);
-    box-shadow: 0 3px 0 #0a0d12;
+    position: absolute; width: 34%; height: 34%; display: grid; place-items: center; border-radius: 14px;
+    background: var(--surface-2); border: 1px solid var(--line); box-shadow: 0 3px 0 #080b0f;
     transition: transform .05s, box-shadow .05s;
 }
-.dp svg { width: 46%; height: 46%; color: var(--text); }
-.dp.up    { top: 4%;    left: 33%; }
-.dp.down  { bottom: 4%; left: 33%; }
-.dp.left  { left: 4%;   top: 33%; }
-.dp.right { right: 4%;  top: 33%; }
-.dp.mid {
-    width: 26%; height: 26%;
-    top: 37%; left: 37%;
-    border-radius: 50%;
-    background: #0f141b;
-    font-size: 11px; font-weight: 800; color: var(--muted);
-}
+.dp svg { width: 46%; height: 46%; }
+.dp.up { top: 4%; left: 33%; } .dp.down { bottom: 4%; left: 33%; }
+.dp.left { left: 4%; top: 33%; } .dp.right { right: 4%; top: 33%; }
+.dp.mid { width: 26%; height: 26%; top: 37%; left: 37%; border-radius: 50%; background: #0f141b; font-size: 11px; font-weight: 800; color: var(--muted); }
+.pressed { transform: translateY(2px); }
+.round.pressed, .dp.pressed { box-shadow: 0 1px 0 #080b0f; }
+.round.primary.pressed { box-shadow: 0 1px 0 #6f9a1f; }
 
-.pressed, button:active { transform: translateY(2px); }
-.round.pressed, .round:active, .dp.pressed, .dp:active { box-shadow: 0 1px 0 #0a0d12; }
-.round.primary.pressed, .round.primary:active { box-shadow: 0 1px 0 #6f9a1f; }
+/* ---------- Cards ---------- */
+.card { background: var(--surface); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); border: 1px solid var(--line); border-radius: 20px; padding: 16px; }
+.card h3 { margin: 0 0 12px; font-size: 12px; font-weight: 800; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; display: flex; justify-content: space-between; align-items: center; }
+.card h3 a { color: var(--accent); text-transform: none; letter-spacing: 0; font-size: 13px; cursor: pointer; }
 
-/* ---------- Cards (Top / Profile) ---------- */
-.card {
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: 18px;
-    padding: 14px;
-}
-.card h3 {
-    margin: 0 0 10px;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-}
-.hero { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.hero .big { font-family: "VT323", monospace; font-size: 56px; line-height: .9; color: var(--accent); }
-.hero .sub { color: var(--muted); font-size: 13px; margin-top: 4px; }
-
-.btn {
-    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-    padding: 11px 16px;
-    border-radius: 12px;
-    font-weight: 700; font-size: 14px;
-    background: var(--accent); color: var(--accent-ink);
-}
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 16px; border-radius: 14px; font-weight: 800; font-size: 14px; background: var(--accent); color: var(--accent-ink); }
 .btn.ghost { background: var(--surface-2); color: var(--text); border: 1px solid var(--line); }
 .btn.danger { background: transparent; color: var(--danger); border: 1px solid #4a2a2e; width: 100%; }
+.btn.block { width: 100%; }
 .btn svg { width: 18px; height: 18px; }
+.btn:active { transform: scale(.98); }
 
+/* Contest */
+.contest {
+    position: relative; overflow: hidden;
+    background: linear-gradient(140deg, rgba(255, 210, 90, .16) 0%, rgba(184, 243, 74, .10) 45%, rgba(20, 27, 36, .9) 100%);
+    border-color: rgba(255, 210, 90, .3);
+}
+.contest .label { font-size: 12px; font-weight: 800; letter-spacing: .1em; color: var(--gold); text-transform: uppercase; }
+.contest .pool { font-family: "Unbounded", sans-serif; font-weight: 900; font-size: 38px; line-height: 1.05; margin: 6px 0 2px; }
+.contest .pool small { font-size: 16px; color: var(--muted); font-weight: 700; }
+.countdown { display: flex; gap: 6px; margin: 12px 0 14px; }
+.countdown div { flex: 1; text-align: center; background: rgba(0, 0, 0, .28); border-radius: 12px; padding: 6px 0 4px; }
+.countdown b { display: block; font-family: "VT323", monospace; font-size: 30px; line-height: 1; font-weight: 400; }
+.countdown span { font-size: 10px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
+.splits { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.split { background: rgba(0, 0, 0, .22); border-radius: 14px; padding: 10px 12px; }
+.split b { display: block; font-size: 13px; }
+.split em { font-style: normal; font-family: "Unbounded", sans-serif; font-weight: 900; font-size: 20px; color: var(--accent); }
+.split span { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+.contest .row-btns { display: flex; gap: 8px; margin-top: 12px; }
+.contest .row-btns .btn { flex: 1; padding: 10px; font-size: 13px; }
+.ended { margin-top: 10px; font-weight: 800; color: var(--gold); }
+
+/* Segmented */
+.seg { display: flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 3px; }
+.seg button { flex: 1; white-space: nowrap; padding: 8px 10px; border-radius: 9px; font-size: 13px; font-weight: 800; color: var(--muted); }
+.seg button.on { background: var(--accent); color: var(--accent-ink); }
+.seg.small button { flex: none; padding: 6px 10px; font-size: 12px; }
+
+/* Board */
+.board-meta { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin: 10px 2px 6px; font-weight: 600; }
 .list { display: flex; flex-direction: column; }
-.row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 0;
-    border-top: 1px solid var(--line);
-}
-.row:first-child { border-top: 0; padding-top: 0; }
-.rank {
-    width: 28px; height: 28px; border-radius: 8px;
-    display: grid; place-items: center;
-    background: var(--surface-2);
-    font-family: "VT323", monospace; font-size: 20px;
-}
-.rank.gold { background: var(--accent); color: var(--accent-ink); }
-.row .meta { flex: 1; min-width: 0; }
-.row .meta b { display: block; font-size: 14px; }
-.row .meta span { font-size: 12px; color: var(--muted); }
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 8px; border-radius: 12px; }
+.row + .row { border-top: 1px solid rgba(38, 49, 63, .6); }
+.row.me { background: var(--accent-dim); border-top-color: transparent; }
+.row.me + .row { border-top-color: transparent; }
+.rank { width: 30px; height: 30px; border-radius: 9px; flex: 0 0 auto; display: grid; place-items: center; background: var(--surface-2); font-family: "VT323", monospace; font-size: 21px; }
+.rank.r1 { background: var(--gold); color: #3a2a00; }
+.rank.r2 { background: var(--silver); color: #26303a; }
+.rank.r3 { background: var(--bronze); color: #3b1f08; }
+.row .who { flex: 1; min-width: 0; }
+.row .who b { display: block; font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.row .who span { font-size: 11px; color: var(--gold); font-weight: 800; }
 .row .pts { font-family: "VT323", monospace; font-size: 26px; }
-.empty { color: var(--muted); font-size: 14px; text-align: center; padding: 10px 0; }
+.sep { text-align: center; color: var(--muted); letter-spacing: .3em; padding: 2px 0; }
+.empty { color: var(--muted); font-size: 14px; text-align: center; padding: 16px 0; line-height: 1.5; }
+.skeleton { height: 46px; border-radius: 12px; background: linear-gradient(90deg, var(--surface-2), #222c39, var(--surface-2)); background-size: 200% 100%; animation: sk 1.2s infinite linear; margin-bottom: 6px; }
+@keyframes sk { to { background-position: -200% 0; } }
 
-.soon { display: flex; gap: 12px; align-items: center; }
-.soon svg { width: 34px; height: 34px; color: var(--muted); flex: 0 0 auto; }
-.soon p { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.4; }
-.soon p b { color: var(--text); }
+/* Invite */
+.invite-stats { display: flex; gap: 8px; margin-bottom: 12px; }
+.invite-stats div { flex: 1; background: var(--surface-2); border-radius: 12px; padding: 10px; }
+.invite-stats b { display: block; font-family: "VT323", monospace; font-size: 30px; line-height: 1; }
+.invite-stats span { font-size: 11px; color: var(--muted); font-weight: 600; }
+.linkbox { display: flex; align-items: center; gap: 8px; background: #0e141b; border: 1px dashed var(--line); border-radius: 12px; padding: 10px 12px; font-size: 13px; color: var(--muted); margin-bottom: 10px; }
+.linkbox code { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: ui-monospace, monospace; color: var(--text); }
+.note { font-size: 12px; color: var(--muted); line-height: 1.45; margin: 10px 0 0; }
+.btns2 { display: flex; gap: 8px; }
+.btns2 .btn { flex: 1; }
 
-.me { display: flex; align-items: center; gap: 14px; }
-.avatar {
-    width: 56px; height: 56px; border-radius: 50%;
-    display: grid; place-items: center;
-    background: var(--accent); color: var(--accent-ink);
-    font-family: "Unbounded", sans-serif; font-weight: 800; font-size: 22px;
-    overflow: hidden; flex: 0 0 auto;
-}
+/* Profile */
+.me-card { display: flex; align-items: center; gap: 14px; }
+.avatar { width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); font-family: "Unbounded", sans-serif; font-weight: 900; font-size: 22px; overflow: hidden; flex: 0 0 auto; }
 .avatar img { width: 100%; height: 100%; object-fit: cover; }
-.me b { font-size: 17px; display: block; }
-.me span { color: var(--muted); font-size: 13px; }
-
+.me-card b { font-size: 17px; display: block; }
+.me-card span { color: var(--muted); font-size: 13px; }
 .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .stat { background: var(--surface-2); border-radius: 12px; padding: 10px; }
-.stat b { display: block; font-family: "VT323", monospace; font-size: 28px; line-height: 1; }
-.stat span { font-size: 11px; color: var(--muted); }
-
+.stat b { display: block; font-family: "VT323", monospace; font-size: 28px; line-height: 1; font-weight: 400; }
+.stat span { font-size: 11px; color: var(--muted); font-weight: 600; }
 .setting { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
 .setting:first-of-type { border-top: 0; padding-top: 0; }
-.setting .l b { display: block; font-size: 14px; font-weight: 600; }
+.setting .l b { display: block; font-size: 14px; font-weight: 700; }
 .setting .l span { font-size: 12px; color: var(--muted); }
-
-.toggle {
-    width: 46px; height: 28px; border-radius: 999px;
-    background: var(--surface-2); border: 1px solid var(--line);
-    position: relative; flex: 0 0 auto; transition: background .15s;
-}
-.toggle::after {
-    content: ""; position: absolute; top: 3px; left: 3px;
-    width: 20px; height: 20px; border-radius: 50%;
-    background: var(--muted); transition: transform .15s, background .15s;
-}
+.toggle { width: 46px; height: 28px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--line); position: relative; flex: 0 0 auto; transition: background .15s; }
+.toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--muted); transition: transform .15s, background .15s; }
 .toggle.on { background: var(--accent); border-color: transparent; }
 .toggle.on::after { transform: translateX(18px); background: var(--accent-ink); }
-
-.seg { display: flex; background: var(--surface-2); border: 1px solid var(--line); border-radius: 10px; padding: 2px; }
-.seg button { white-space: nowrap; padding: 6px 10px; border-radius: 8px; font-size: 12px; font-weight: 700; color: var(--muted); }
-.seg button.on { background: var(--accent); color: var(--accent-ink); }
-
 .swatches { display: flex; gap: 8px; }
 .sw { width: 30px; height: 30px; border-radius: 9px; border: 2px solid transparent; position: relative; }
 .sw::after { content: ""; position: absolute; inset: 9px; border-radius: 3px; background: var(--dot); }
 .sw.on { border-color: var(--accent); }
+.links { display: flex; flex-direction: column; gap: 8px; }
+
+.banner { display: flex; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 14px; background: rgba(64, 196, 255, .08); border: 1px solid rgba(64, 196, 255, .25); font-size: 12px; color: #a9dcf5; line-height: 1.4; }
+.banner svg { width: 18px; height: 18px; flex: 0 0 auto; }
+
+/* ---------- Sheet (rules / privacy) ---------- */
+.sheet { position: absolute; inset: 0; z-index: 20; background: var(--bg); display: none; flex-direction: column; }
+.sheet.open { display: flex; }
+.sheet header { display: flex; align-items: center; gap: 10px; padding: 12px 14px; border-bottom: 1px solid var(--line); }
+.sheet header b { font-size: 16px; flex: 1; }
+.sheet header button { width: 36px; height: 36px; border-radius: 10px; background: var(--surface-2); display: grid; place-items: center; }
+.sheet header svg { width: 18px; height: 18px; }
+.sheet .body { flex: 1; overflow-y: auto; padding: 16px 16px 40px; font-size: 14px; line-height: 1.6; color: #cfd8e3; touch-action: pan-y; user-select: text; -webkit-user-select: text; }
+.sheet .body h4 { color: var(--text); margin: 18px 0 6px; font-size: 15px; }
+.sheet .body h4:first-child { margin-top: 0; }
+.sheet .body ul { padding-left: 18px; margin: 6px 0; }
+
+/* ---------- Toast ---------- */
+.toast {
+    position: absolute; left: 50%; top: calc(58px + env(safe-area-inset-top)); z-index: 30;
+    transform: translate(-50%, -20px); opacity: 0; pointer-events: none;
+    background: var(--surface-solid); border: 1px solid var(--line); border-radius: 14px;
+    padding: 10px 16px; font-size: 14px; font-weight: 700; box-shadow: 0 10px 30px rgba(0, 0, 0, .5);
+    transition: opacity .2s, transform .2s; max-width: 90%; text-align: center;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.good { border-color: rgba(184, 243, 74, .5); }
+.toast.bad { border-color: rgba(255, 100, 100, .5); }
 
 /* ---------- Tab bar ---------- */
-.tabbar {
-    flex: 0 0 auto;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    padding: 6px 10px calc(6px + env(safe-area-inset-bottom));
-    background: var(--surface);
-    border-top: 1px solid var(--line);
-}
-.tabbar button {
-    display: flex; flex-direction: column; align-items: center; gap: 3px;
-    padding: 6px 0;
-    border-radius: 12px;
-    color: var(--muted);
-    font-size: 11px; font-weight: 600;
-}
+.tabbar { flex: 0 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); padding: 6px 10px calc(6px + env(safe-area-inset-bottom)); background: rgba(14, 19, 26, .92); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
+.tabbar button { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 6px 0; border-radius: 12px; color: var(--muted); font-size: 11px; font-weight: 700; position: relative; }
 .tabbar svg { width: 22px; height: 22px; }
 .tabbar button.on { color: var(--accent); }
-.tabbar button:active { transform: none; background: var(--surface-2); }
+.tabbar .dot { position: absolute; top: 4px; left: calc(50% + 8px); width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
 </style>
 </head>
 <body>
 
-<!-- Icons -->
 <svg width="0" height="0" style="position:absolute">
   <defs>
     <symbol id="i-game" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="4"/><path d="M7 10v4M5 12h4"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="18" cy="13" r="1" fill="currentColor"/></symbol>
@@ -352,14 +281,20 @@ button {
     <symbol id="i-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></symbol>
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 6l7 10H5z" fill="currentColor"/></symbol>
     <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-7M16 6l-4-4-4 4M12 2v13"/></symbol>
-    <symbol id="i-globe" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-5M12 8h.01"/></symbol>
   </defs>
 </svg>
 
 <div class="app">
     <header class="top">
         <div class="logo">GG<span>SNAKE</span></div>
-        <div class="chip"><svg><use href="#i-trophy"/></svg><span id="chipBest">0000</span></div>
+        <button class="prize-chip" id="prizeChip" style="display:none">
+            <span class="cup"><svg><use href="#i-trophy"/></svg></span>
+            <span id="chipPool">$1000</span>
+            <small id="chipTime">--</small>
+        </button>
     </header>
 
     <main>
@@ -374,22 +309,21 @@ button {
                     </div>
                     <div class="stage" id="stage"><canvas id="game"></canvas></div>
                     <div class="hud bottom">
-                        <span id="modeLabel">КЛАСИКА</span>
+                        <span id="modeLabel">РЕЙТИНГ</span>
                         <span id="hint">OK — старт</span>
                     </div>
                 </div>
             </div>
-
             <div class="controls" id="controls">
                 <div class="side">
                     <button class="round" id="btnReset" aria-label="Скинути"><svg><use href="#i-reset"/></svg></button>
                     <small>СКИНУТИ</small>
                 </div>
                 <div class="dpad">
-                    <button class="dp up" data-dir="up" aria-label="Вгору"><svg><use href="#i-arrow"/></svg></button>
-                    <button class="dp left" data-dir="left" aria-label="Вліво"><svg style="transform:rotate(-90deg)"><use href="#i-arrow"/></svg></button>
-                    <button class="dp right" data-dir="right" aria-label="Вправо"><svg style="transform:rotate(90deg)"><use href="#i-arrow"/></svg></button>
-                    <button class="dp down" data-dir="down" aria-label="Вниз"><svg style="transform:rotate(180deg)"><use href="#i-arrow"/></svg></button>
+                    <button class="dp up" data-dir="U" aria-label="Вгору"><svg><use href="#i-arrow"/></svg></button>
+                    <button class="dp left" data-dir="L" aria-label="Вліво"><svg style="transform:rotate(-90deg)"><use href="#i-arrow"/></svg></button>
+                    <button class="dp right" data-dir="R" aria-label="Вправо"><svg style="transform:rotate(90deg)"><use href="#i-arrow"/></svg></button>
+                    <button class="dp down" data-dir="D" aria-label="Вниз"><svg style="transform:rotate(180deg)"><use href="#i-arrow"/></svg></button>
                     <button class="dp mid" id="btnMid">OK</button>
                 </div>
                 <div class="side">
@@ -401,62 +335,84 @@ button {
 
         <!-- ===== TOP ===== -->
         <section class="tab scroll" id="tab-top">
-            <div class="card">
-                <h3>Твій рекорд</h3>
-                <div class="hero">
-                    <div>
-                        <div class="big" id="topBest">0</div>
-                        <div class="sub" id="topBestSub">Зіграй першу гру</div>
-                    </div>
-                    <button class="btn" id="btnShare"><svg><use href="#i-share"/></svg>Поділитись</button>
+            <div class="card contest" id="contestCard" style="display:none">
+                <div class="label">Розіграш</div>
+                <div class="pool"><span id="cPool">$1000</span> <small id="cCurrency">USDT</small></div>
+                <div class="countdown" id="countdown">
+                    <div><b id="cdD">0</b><span>дні</span></div>
+                    <div><b id="cdH">00</b><span>год</span></div>
+                    <div><b id="cdM">00</b><span>хв</span></div>
+                    <div><b id="cdS">00</b><span>сек</span></div>
+                </div>
+                <div class="ended" id="cEnded" style="display:none">Конкурс завершено. Переможців оголосимо в боті.</div>
+                <div class="splits">
+                    <div class="split"><b>Рекорди</b><em id="cScoreSum">$600</em><span id="cScorePlaces">топ-5</span></div>
+                    <div class="split"><b>Друзі</b><em id="cRefSum">$400</em><span id="cRefPlaces">топ-5</span></div>
+                </div>
+                <div class="row-btns">
+                    <button class="btn" id="btnPlayNow"><svg><use href="#i-play"/></svg>Грати</button>
+                    <button class="btn ghost" data-open="rules">Правила</button>
                 </div>
             </div>
 
             <div class="card">
-                <h3>Найкращі ігри</h3>
-                <div class="list" id="topList"></div>
+                <div class="seg" id="segBoard">
+                    <button data-v="score" class="on">Рекорди</button>
+                    <button data-v="ref">Друзі</button>
+                </div>
+                <div class="board-meta"><span id="boardHint">Найкращий результат за весь конкурс</span><span id="boardCount"></span></div>
+                <div class="list" id="boardList"></div>
             </div>
 
-            <div class="card soon">
-                <svg><use href="#i-globe"/></svg>
-                <p><b>Світовий рейтинг і друзі</b><br>З'явиться, коли підключимо сервер бота. Тоді тут буде топ гравців і рейтинг серед твоїх друзів.</p>
+            <div class="card">
+                <h3>Запроси друзів</h3>
+                <div class="invite-stats">
+                    <div><b id="invActive">0</b><span>зараховано</span></div>
+                    <div><b id="invTotal">0</b><span>перейшли за посиланням</span></div>
+                    <div><b id="invRank">—</b><span>місце</span></div>
+                </div>
+                <div class="linkbox"><code id="refLink">Відкрий гру в Telegram</code></div>
+                <div class="btns2">
+                    <button class="btn" id="btnInvite"><svg><use href="#i-share"/></svg>Запросити</button>
+                    <button class="btn ghost" id="btnCopy"><svg><use href="#i-copy"/></svg>Копіювати</button>
+                </div>
+                <p class="note" id="refNote">Друг зараховується, коли зіграє 3 гри і набере 50+ очок.</p>
             </div>
         </section>
 
         <!-- ===== PROFILE ===== -->
         <section class="tab scroll" id="tab-profile">
-            <div class="card me">
+            <div class="card me-card">
                 <div class="avatar" id="avatar">G</div>
-                <div>
-                    <b id="userName">Гравець</b>
-                    <span id="userHandle">GGSNAKE</span>
-                </div>
+                <div><b id="userName">Гравець</b><span id="userHandle">GGSNAKE</span></div>
             </div>
-
+            <div class="banner" id="offlineBanner" style="display:none">
+                <svg><use href="#i-info"/></svg>
+                <span id="offlineText">Відкрий гру в Telegram, щоб твої результати потрапили в рейтинг.</span>
+            </div>
             <div class="card">
                 <h3>Статистика</h3>
                 <div class="stats">
-                    <div class="stat"><b id="stGames">0</b><span>Ігор</span></div>
                     <div class="stat"><b id="stBest">0</b><span>Рекорд</span></div>
+                    <div class="stat"><b id="stRank">—</b><span>Місце</span></div>
+                    <div class="stat"><b id="stGames">0</b><span>Ігор</span></div>
                     <div class="stat"><b id="stAvg">0</b><span>Середній</span></div>
                     <div class="stat"><b id="stFood">0</b><span>З'їдено</span></div>
-                    <div class="stat"><b id="stLen">0</b><span>Макс. довжина</span></div>
                     <div class="stat"><b id="stTime">0</b><span>Хв у грі</span></div>
                 </div>
             </div>
-
             <div class="card">
                 <h3>Налаштування</h3>
                 <div class="setting">
-                    <div class="l"><b>Режим</b><span>Без стін — проходиш крізь край</span></div>
-                    <div class="seg" id="segMode">
-                        <button data-v="classic">Класика</button>
-                        <button data-v="wrap">Без стін</button>
+                    <div class="l"><b>Режим</b><span>Тренування — без стін, не в рейтинг</span></div>
+                    <div class="seg small" id="segMode">
+                        <button data-v="classic">Рейтинг</button>
+                        <button data-v="wrap">Тренування</button>
                     </div>
                 </div>
                 <div class="setting">
-                    <div class="l"><b>Керування</b><span>Свайпи — ще більший екран</span></div>
-                    <div class="seg" id="segControls">
+                    <div class="l"><b>Керування</b><span>Свайпи — більший екран</span></div>
+                    <div class="seg small" id="segControls">
                         <button data-v="buttons">Кнопки</button>
                         <button data-v="swipe">Свайпи</button>
                     </div>
@@ -470,138 +426,165 @@ button {
                     <button class="toggle" id="tglHaptic" aria-label="Вібрація"></button>
                 </div>
             </div>
-
-            <button class="btn danger" id="btnClear">Скинути статистику</button>
+            <div class="links">
+                <button class="btn ghost block" data-open="rules">Правила розіграшу</button>
+                <button class="btn ghost block" data-open="privacy">Конфіденційність</button>
+            </div>
         </section>
     </main>
 
     <nav class="tabbar">
         <button class="on" data-tab="game"><svg><use href="#i-game"/></svg>Гра</button>
-        <button data-tab="top"><svg><use href="#i-trophy"/></svg>Рейтинг</button>
+        <button data-tab="top"><svg><use href="#i-trophy"/></svg>Рейтинг<i class="dot" id="topDot" style="display:none"></i></button>
         <button data-tab="profile"><svg><use href="#i-user"/></svg>Профіль</button>
     </nav>
+
+    <div class="sheet" id="sheet">
+        <header><b id="sheetTitle">Правила</b><button id="sheetClose" aria-label="Закрити"><svg><use href="#i-close"/></svg></button></header>
+        <div class="body" id="sheetBody"></div>
+    </div>
+
+    <div class="toast" id="toast"></div>
 </div>
 
 <script>
 "use strict";
 
-// Mini App link (BotFather /newapp short name "play")
+/* ================= Config ================= */
+// Worker URL after deploy, e.g. "https://ggsnake-api.<your-subdomain>.workers.dev"
+const API_BASE = "";
 const BOT_LINK = "https://t.me/ggsnake_game_bot/play";
+const ORGANIZER_CONTACT = "@ggsnake_game_bot";   // TODO: your support contact
 
 /* ================= Telegram ================= */
 const tg = window.Telegram && window.Telegram.WebApp;
 const tgAtLeast = v => !!(tg && tg.isVersionAtLeast && tg.isVersionAtLeast(v));
+const inTelegram = !!(tg && tg.initData);
+const E = window.GGEngine;
 
 function applyViewport() {
     const h = (tg && tg.viewportStableHeight) || window.innerHeight;
     document.documentElement.style.setProperty("--vh", h + "px");
 }
-
 if (tg) {
     tg.ready();
     tg.expand();
     try { tg.disableVerticalSwipes && tg.disableVerticalSwipes(); } catch (e) {}
-    try { tg.setHeaderColor("#0b0f14"); tg.setBackgroundColor("#0b0f14"); } catch (e) {}
-    try { tg.setBottomBarColor && tg.setBottomBarColor("#141a22"); } catch (e) {}
+    try { tg.setHeaderColor("#0a0e13"); tg.setBackgroundColor("#0a0e13"); } catch (e) {}
+    try { tg.setBottomBarColor && tg.setBottomBarColor("#0e131a"); } catch (e) {}
     tg.onEvent && tg.onEvent("viewportChanged", () => { applyViewport(); relayoutSoon(); });
 }
 window.addEventListener("resize", () => { applyViewport(); relayoutSoon(); });
 applyViewport();
 
-/* ================= Persistence ================= */
+const $ = id => document.getElementById(id);
+
+/* ================= Local storage ================= */
 const THEMES = {
     green: { lcd: "#b9c9a0", ink: "#1f2a16" },
     amber: { lcd: "#24180a", ink: "#ffb43a" },
     ice:   { lcd: "#a8d4e0", ink: "#0d2a38" },
     neon:  { lcd: "#0c120e", ink: "#b8f34a" }
 };
-
-const DEFAULT_DATA = { best: 0, games: 0, food: 0, total: 0, time: 0, maxLen: 3, top: [] };
+const DEFAULT_DATA = { best: 0, games: 0, food: 0, total: 0, time: 0 };
 const DEFAULT_SET = { mode: "classic", controls: "buttons", theme: "green", haptic: true };
 
 function readLS(key, def) {
     try { return Object.assign({}, def, JSON.parse(localStorage.getItem(key)) || {}); }
     catch (e) { return Object.assign({}, def); }
 }
-function writeLS(key, val) {
-    try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {}
-}
+function writeLS(key, val) { try { localStorage.setItem(key, JSON.stringify(val)); } catch (e) {} }
 
-let data = readLS("gg_data", DEFAULT_DATA);
+let local = readLS("gg_data", DEFAULT_DATA);
 let settings = readLS("gg_settings", DEFAULT_SET);
-
-function saveData() {
-    writeLS("gg_data", data);
-    // Telegram CloudStorage keeps progress across the user's devices
-    if (tgAtLeast("6.9")) try { tg.CloudStorage.setItem("gg_data", JSON.stringify(data)); } catch (e) {}
-}
-function saveSettings() { writeLS("gg_settings", settings); }
-
-if (tgAtLeast("6.9")) {
-    try {
-        tg.CloudStorage.getItem("gg_data", (err, val) => {
-            if (err || !val) return;
-            try {
-                const cloud = JSON.parse(val);
-                if ((cloud.games || 0) > data.games || (cloud.best || 0) > data.best) {
-                    data = Object.assign({}, DEFAULT_DATA, cloud);
-                    writeLS("gg_data", data);
-                    renderAll();
-                }
-            } catch (e) {}
-        });
-    } catch (e) {}
-}
+const saveLocal = () => writeLS("gg_data", local);
+const saveSettings = () => writeLS("gg_settings", settings);
 
 function haptic(type) {
     if (!settings.haptic) return;
     try {
         const h = tg && tg.HapticFeedback;
         if (!h) return;
-        if (type === "error" || type === "success") h.notificationOccurred(type);
+        if (type === "error" || type === "success" || type === "warning") h.notificationOccurred(type);
         else if (type === "select") h.selectionChanged();
         else h.impactOccurred(type || "light");
     } catch (e) {}
 }
 
+let toastT = null;
+function toast(msg, kind) {
+    const t = $("toast");
+    t.textContent = msg;
+    t.className = "toast show " + (kind || "");
+    clearTimeout(toastT);
+    toastT = setTimeout(() => { t.className = "toast " + (kind || ""); }, 2600);
+}
+
+/* ================= Server API ================= */
+const online = () => !!(API_BASE && inTelegram);
+let me = null;           // server profile
+let contest = null;      // contest config
+
+async function api(path, opts) {
+    opts = opts || {};
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), opts.timeout || 8000);
+    try {
+        const headers = {};
+        if (tg && tg.initData) headers["X-Init-Data"] = tg.initData;
+        if (opts.body) headers["Content-Type"] = "application/json";
+        const res = await fetch(API_BASE + path, {
+            method: opts.method || "GET",
+            headers,
+            body: opts.body ? JSON.stringify(opts.body) : undefined,
+            signal: ctrl.signal
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) { const err = new Error(data.error || "http_" + res.status); err.code = data.error; throw err; }
+        return data;
+    } finally { clearTimeout(timer); }
+}
+
+async function loadMe() {
+    if (!online()) return;
+    try {
+        const r = await api("/api/me", { method: "POST" });
+        me = r.me; contest = r.contest;
+        renderAll();
+    } catch (e) {
+        console.warn("me failed", e);
+    }
+}
+
 /* ================= Game ================= */
-const canvas = document.getElementById("game");
+const canvas = $("game");
 const ctx = canvas.getContext("2d");
-const stage = document.getElementById("stage");
+const stage = $("stage");
+const COLS = E.COLS, ROWS = E.ROWS, U = 16;
 
-const COLS = 20;
-const U = 16;              // drawing units per cell
-let ROWS = 24;             // fitted to screen height
-let cellPx = 16;
-
-const $ = id => document.getElementById(id);
-
-let snake = [], food = { x: 0, y: 0 };
-let direction = "right", queue = [];
-let score = 0, eaten = 0;
-let state = "idle";        // idle | running | paused | over | win
+let game = null;
+let queue = [];
+let turns = [];
+let state = "idle";       // idle | running | paused | over | win
 let timer = null, blinkOn = true, blinkTimer = null;
 let playStart = 0;
+let session = null;       // { sessionId, seed, fetchedAt }
+let sessionPromise = null;
+let ranked = false;       // current game counts for leaderboard
+let submitting = false;
+let cellPx = 16;
 let needRelayout = false;
 
 const theme = () => THEMES[settings.theme] || THEMES.green;
 const pad = (n, w) => String(n).padStart(w, "0");
-const level = () => Math.min(9, 1 + Math.floor(score / 50));
-const speed = () => Math.max(60, 150 - (level() - 1) * 11);
+const isRankedMode = () => settings.mode === "classic" && online();
+const bestShown = () => settings.mode === "wrap" ? (local.bestWrap || 0) : Math.max(local.best, me ? me.best : 0);
 
-/* Fit the grid to whatever space the screen has */
 function layout() {
     const r = stage.getBoundingClientRect();
     if (r.width < 10 || r.height < 10) { needRelayout = true; return; }
     needRelayout = false;
-
-    const busy = state === "running" || state === "paused";
-    if (!busy) {
-        cellPx = Math.floor(r.width / COLS);
-        ROWS = Math.max(14, Math.min(40, Math.floor(r.height / cellPx)));
-    }
     cellPx = Math.max(6, Math.floor(Math.min(r.width / COLS, r.height / ROWS)));
-
     const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
     canvas.style.width = COLS * cellPx + "px";
     canvas.style.height = ROWS * cellPx + "px";
@@ -609,25 +592,29 @@ function layout() {
     canvas.height = Math.round(ROWS * cellPx * dpr);
     ctx.setTransform(cellPx * dpr / U, 0, 0, cellPx * dpr / U, 0, 0);
     ctx.imageSmoothingEnabled = false;
-
-    if (!busy) resetGame(true);
-    else draw();
+    draw();
 }
-
 let relayoutT = null;
 function relayoutSoon() {
     clearTimeout(relayoutT);
     relayoutT = setTimeout(() => { if (currentTab === "game") layout(); else needRelayout = true; }, 60);
 }
 
-function placeFood() {
-    const empty = [];
-    for (let y = 0; y < ROWS; y++)
-        for (let x = 0; x < COLS; x++)
-            if (!snake.some(p => p.x === x && p.y === y)) empty.push({ x, y });
-    if (!empty.length) return false;
-    food = empty[Math.floor(Math.random() * empty.length)];
-    return true;
+/* ---------- Sessions (ranked games) ---------- */
+function fetchSession() {
+    if (!isRankedMode()) return Promise.resolve(null);
+    if (session && Date.now() - session.fetchedAt < 4 * 3600000) return Promise.resolve(session);
+    if (sessionPromise) return sessionPromise;
+    sessionPromise = api("/api/session/start", { method: "POST" })
+        .then(s => { session = Object.assign(s, { fetchedAt: Date.now() }); return session; })
+        .catch(e => { console.warn("session", e); return null; })
+        .finally(() => { sessionPromise = null; });
+    return sessionPromise;
+}
+
+function newGame(seed) {
+    game = E.create({ seed: seed || (Math.random() * 2147483646 + 1) | 0, mode: settings.mode });
+    queue = []; turns = [];
 }
 
 /* ---------- Drawing ---------- */
@@ -635,82 +622,79 @@ function hexA(hex, a) {
     const n = parseInt(hex.slice(1), 16);
     return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`;
 }
-
-function cell(x, y, inset) {
-    ctx.fillRect(x * U + inset, y * U + inset, U - inset * 2, U - inset * 2);
-}
+function cell(x, y, inset) { ctx.fillRect(x * U + inset, y * U + inset, U - inset * 2, U - inset * 2); }
 
 function panel(lines) {
     const W = COLS * U, H = ROWS * U, t = theme();
-    const bw = W - 64, bh = 92, bx = 32, by = H / 2 - bh / 2;
-    ctx.fillStyle = hexA(t.lcd, 0.94);
+    const bw = W - 48, bh = lines.length > 2 ? 116 : 92, bx = 24, by = H / 2 - bh / 2;
+    ctx.fillStyle = hexA(t.lcd, 0.95);
     ctx.fillRect(bx, by, bw, bh);
-    ctx.strokeStyle = t.ink;
-    ctx.lineWidth = 2;
+    ctx.strokeStyle = t.ink; ctx.lineWidth = 2;
     ctx.strokeRect(bx + 4, by + 4, bw - 8, bh - 8);
-    ctx.fillStyle = t.ink;
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
+    ctx.fillStyle = t.ink; ctx.textAlign = "center"; ctx.textBaseline = "middle";
     ctx.font = "36px VT323, monospace";
-    ctx.fillText(lines[0], W / 2, by + 34);
+    ctx.fillText(lines[0], W / 2, by + 32);
     ctx.font = "22px VT323, monospace";
-    ctx.fillText(lines[1], W / 2, by + 64);
+    ctx.fillText(lines[1], W / 2, by + 62);
+    if (lines[2]) ctx.fillText(lines[2], W / 2, by + 88);
 }
 
 function draw() {
+    if (!game) return;
     const W = COLS * U, H = ROWS * U, t = theme();
     ctx.clearRect(0, 0, W, H);
-
-    // unlit LCD pixels
     ctx.fillStyle = hexA(t.ink, 0.07);
     for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) cell(x, y, 1);
 
-    // border: solid in classic, dashed when walls are off
-    ctx.strokeStyle = t.ink;
-    ctx.lineWidth = 2;
-    ctx.setLineDash(settings.mode === "wrap" ? [6, 6] : []);
+    ctx.strokeStyle = t.ink; ctx.lineWidth = 2;
+    ctx.setLineDash(game.wrap ? [6, 6] : []);
     ctx.strokeRect(1, 1, W - 2, H - 2);
     ctx.setLineDash([]);
 
     ctx.fillStyle = t.ink;
-
-    // food
-    const q = U / 4, fx = food.x * U, fy = food.y * U;
-    ctx.fillRect(fx + q * 1.5, fy + q * 0.5, q, q);
-    ctx.fillRect(fx + q * 0.5, fy + q * 1.5, q, q);
-    ctx.fillRect(fx + q * 2.5, fy + q * 1.5, q, q);
-    ctx.fillRect(fx + q * 1.5, fy + q * 2.5, q, q);
-
-    // snake
+    if (game.food) {
+        const q = U / 4, fx = game.food.x * U, fy = game.food.y * U;
+        ctx.fillRect(fx + q * 1.5, fy + q * 0.5, q, q);
+        ctx.fillRect(fx + q * 0.5, fy + q * 1.5, q, q);
+        ctx.fillRect(fx + q * 2.5, fy + q * 1.5, q, q);
+        ctx.fillRect(fx + q * 1.5, fy + q * 2.5, q, q);
+    }
     if (blinkOn) {
-        snake.forEach((p, i) => {
+        const s = game.snake;
+        s.forEach((p, i) => {
             cell(p.x, p.y, 1);
-            const n = snake[i + 1];
+            const n = s[i + 1];
             if (n && Math.abs(p.x - n.x) + Math.abs(p.y - n.y) === 1) {
                 const bx = Math.min(p.x, n.x) * U, by = Math.min(p.y, n.y) * U;
                 if (p.x !== n.x) ctx.fillRect(bx + U - 1, by + 3, 2, U - 6);
                 else ctx.fillRect(bx + 3, by + U - 1, U - 6, 2);
             }
         });
-        const h = snake[0];
-        const e = { right: [10, 4], left: [3, 4], up: [4, 3], down: [4, 10] }[direction];
+        const h = s[0];
+        const e = { R: [10, 4], L: [3, 4], U: [4, 3], D: [4, 10] }[game.dir];
         ctx.fillStyle = t.lcd;
         ctx.fillRect(h.x * U + e[0], h.y * U + e[1], 3, 3);
     }
 
     if (state === "idle") panel(["SNAKE", "натисни OK"]);
     if (state === "paused") panel(["ПАУЗА", "натисни OK"]);
-    if (state === "over") panel(["GAME OVER", "рахунок " + score]);
-    if (state === "win") panel(["ПЕРЕМОГА!", "рахунок " + score]);
+    if (state === "over" || state === "win") {
+        const title = state === "win" ? "ПЕРЕМОГА!" : "GAME OVER";
+        let third = "";
+        if (lastResult) third = lastResult;
+        else if (submitting) third = "зберігаємо...";
+        panel([title, "рахунок " + game.score, third]);
+    }
 }
+let lastResult = "";
 
 /* ---------- HUD ---------- */
 function updateHud() {
+    const score = game ? game.score : 0;
     $("score").textContent = pad(score, 4);
-    $("best").textContent = "HI " + pad(data.best, 4);
-    $("level").textContent = "LV" + level();
-    $("chipBest").textContent = pad(data.best, 4);
-    $("modeLabel").textContent = settings.mode === "wrap" ? "БЕЗ СТІН" : "КЛАСИКА";
+    $("best").textContent = "HI " + pad(Math.max(bestShown(), state === "running" ? score : 0), 4);
+    $("level").textContent = "LV" + (game ? game.level() : 1);
+    $("modeLabel").textContent = settings.mode === "wrap" ? "ТРЕНУВАННЯ" : (online() ? "РЕЙТИНГ" : "ОФЛАЙН");
     const hints = { idle: "OK — старт", running: "грай!", paused: "OK — далі", over: "OK — ще раз", win: "OK — ще раз" };
     $("hint").textContent = hints[state];
     const running = state === "running";
@@ -719,33 +703,43 @@ function updateHud() {
 }
 
 /* ---------- Flow ---------- */
-function stopTimer() { if (timer !== null) { clearInterval(timer); timer = null; } }
-function startTimer() { stopTimer(); timer = setInterval(tick, speed()); }
-
-function trackTime() {
-    if (playStart) { data.time += Date.now() - playStart; playStart = 0; }
-}
+function stopTimer() { if (timer !== null) { clearTimeout(timer); timer = null; } }
+function schedule() { stopTimer(); timer = setTimeout(tick, game.interval()); }
+function trackTime() { if (playStart) { local.time += Date.now() - playStart; playStart = 0; saveLocal(); } }
 
 function resetGame(silent) {
-    stopTimer();
-    clearInterval(blinkTimer); blinkOn = true;
-    if (state === "running" || state === "paused") { trackTime(); }
-    const y = Math.floor(ROWS / 2);
-    snake = [{ x: 6, y }, { x: 5, y }, { x: 4, y }];
-    direction = "right"; queue = [];
-    score = 0; eaten = 0;
-    state = "idle";
-    placeFood();
-    updateHud();
-    draw();
+    stopTimer(); clearInterval(blinkTimer); blinkOn = true;
+    if (state === "running" || state === "paused") trackTime();
+    state = "idle"; lastResult = "";
+    // If a ranked game was abandoned its session is used up
+    if (ranked && turns.length + (game ? game.ticks : 0) > 0) session = null;
+    ranked = false;
+    newGame(session ? session.seed : null);
+    updateHud(); draw();
     if (!silent) haptic("rigid");
+    if (isRankedMode() && !session) {
+        fetchSession().then(s => { if (s && state === "idle") { newGame(s.seed); draw(); } });
+    }
 }
 
-function play() {
+async function play() {
+    if (submitting) return;
     if (state === "over" || state === "win") resetGame(true);
+    if (state === "idle") {
+        if (isRankedMode()) {
+            const s = session || await fetchSession();
+            if (s) {
+                newGame(s.seed);
+                ranked = true;
+            } else {
+                ranked = false;
+                toast("Немає зв'язку з сервером — гра не йде в рейтинг", "bad");
+            }
+        } else ranked = false;
+    }
     state = "running";
     playStart = Date.now();
-    startTimer();
+    schedule();
     updateHud(); draw();
 }
 
@@ -758,24 +752,15 @@ function pause() {
 
 function toggle() { state === "running" ? pause() : play(); }
 
-function finish(result) {
+async function finish(result) {
     state = result;
     stopTimer(); trackTime();
     haptic(result === "win" ? "success" : "error");
 
-    data.games++;
-    data.food += eaten;
-    data.total += score;
-    data.maxLen = Math.max(data.maxLen, snake.length);
-    if (score > data.best) data.best = score;
-    if (score > 0) {
-        data.top.push({ s: score, l: snake.length, m: settings.mode, d: Date.now() });
-        data.top.sort((a, b) => b.s - a.s);
-        data.top = data.top.slice(0, 10);
-    }
-    saveData();
-    updateHud();
-    renderTop(); renderProfile();
+    local.games++; local.food += game.eaten; local.total += game.score;
+    if (settings.mode === "wrap") local.bestWrap = Math.max(local.bestWrap || 0, game.score);
+    else if (game.score > local.best) local.best = game.score;
+    saveLocal();
 
     let n = 0;
     clearInterval(blinkTimer);
@@ -783,95 +768,104 @@ function finish(result) {
         blinkOn = !blinkOn; draw();
         if (++n >= 6) { clearInterval(blinkTimer); blinkOn = true; draw(); }
     }, 170);
+
+    if (ranked && session) {
+        const sid = session.sessionId;
+        session = null; ranked = false;
+        submitting = true; lastResult = ""; draw();
+        try {
+            const r = await api("/api/session/finish", { method: "POST", body: { sessionId: sid, turns: turns.join(",") }, timeout: 15000 });
+            me = r.me;
+            if (r.contestOver) lastResult = "конкурс завершено";
+            else if (r.newBest) {
+                lastResult = "РЕКОРД! місце #" + (me.scoreRank || "?");
+                toast("Новий рекорд — " + r.score + "! Ти #" + (me.scoreRank || "?") + " у рейтингу", "good");
+                haptic("success");
+                $("topDot").style.display = "";
+            } else lastResult = me.scoreRank ? "твоє місце #" + me.scoreRank : "";
+            renderAll();
+        } catch (e) {
+            lastResult = "не зараховано";
+            const msg = { too_fast: "Гра не пройшла перевірку часу", invalid_run: "Гра не пройшла перевірку",
+                          daily_limit: "Ліміт ігор на сьогодні", banned: "Акаунт заблоковано" }[e.code];
+            toast(msg || "Не вдалося зберегти результат", "bad");
+        } finally {
+            submitting = false;
+            updateHud(); draw();
+            fetchSession(); // prepare next ranked game
+        }
+    } else {
+        ranked = false;
+        updateHud(); renderProfile();
+    }
     draw();
 }
-
-const OPP = { up: "down", down: "up", left: "right", right: "left" };
-const STEP = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
 function tick() {
-    if (queue.length) direction = queue.shift();
+    timer = null;
+    if (state !== "running") return;
+    const turn = queue.length ? queue.shift() : null;
+    const t = game.ticks;
+    const lvBefore = game.level();
+    const ev = game.step(turn);
+    if (ev.turned) turns.push(t + ":" + game.dir);
 
-    const head = { x: snake[0].x + STEP[direction][0], y: snake[0].y + STEP[direction][1] };
-
-    if (settings.mode === "wrap") {
-        head.x = (head.x + COLS) % COLS;
-        head.y = (head.y + ROWS) % ROWS;
-    } else if (head.x < 0 || head.y < 0 || head.x >= COLS || head.y >= ROWS) {
-        finish("over"); return;
-    }
-
-    const ate = head.x === food.x && head.y === food.y;
-    const body = ate ? snake : snake.slice(0, -1);
-    if (body.some(p => p.x === head.x && p.y === head.y)) { finish("over"); return; }
-
-    snake.unshift(head);
-
-    if (ate) {
-        const lv = level();
-        score += 10; eaten++;
+    if (ev.dead) { finish("over"); return; }
+    if (ev.won) { finish("win"); return; }
+    if (ev.ate) {
         haptic("light");
-        if (!placeFood()) { finish("win"); return; }
-        if (level() !== lv) { startTimer(); haptic("medium"); }
-        if (score > data.best) { $("best").textContent = "HI " + pad(score, 4); }
-        updateHud();
-    } else {
-        snake.pop();
+        if (game.level() !== lvBefore) haptic("medium");
     }
-    draw();
+    updateHud(); draw();
+    schedule();
 }
 
+const OPP = { U: "D", D: "U", L: "R", R: "L" };
 function turn(dir) {
-    const last = queue.length ? queue[queue.length - 1] : direction;
+    const last = queue.length ? queue[queue.length - 1] : game.dir;
     if (dir === last || dir === OPP[last] || queue.length >= 2) return;
     queue.push(dir);
 }
-
 function onDirection(dir) {
     haptic("light");
-    if (state === "idle" || state === "paused") { turn(dir); play(); return; }
+    if (state === "idle" || state === "paused") { if (state === "paused") turn(dir); play().then(() => { if (state === "running" && game.ticks === 0) turn(dir); }); return; }
     if (state === "running") turn(dir);
 }
 
 /* ---------- Input ---------- */
 function press(btn, fn) {
-    btn.addEventListener("pointerdown", e => {
-        e.preventDefault();
-        btn.classList.add("pressed");
-        fn();
-    });
+    btn.addEventListener("pointerdown", e => { e.preventDefault(); btn.classList.add("pressed"); fn(); });
     const up = () => btn.classList.remove("pressed");
     ["pointerup", "pointerleave", "pointercancel"].forEach(ev => btn.addEventListener(ev, up));
 }
-
 document.querySelectorAll("[data-dir]").forEach(b => press(b, () => onDirection(b.dataset.dir)));
 press($("btnPlay"), () => { haptic("medium"); toggle(); });
 press($("btnMid"), () => { haptic("medium"); toggle(); });
-press($("btnReset"), () => resetGame());
+press($("btnReset"), () => { if (!submitting) resetGame(); });
 
 document.addEventListener("keydown", e => {
-    if (currentTab !== "game") return;
-    const map = { ArrowUp: "up", ArrowDown: "down", ArrowLeft: "left", ArrowRight: "right", w: "up", s: "down", a: "left", d: "right" };
+    if (currentTab !== "game" || $("sheet").classList.contains("open")) return;
+    const map = { ArrowUp: "U", ArrowDown: "D", ArrowLeft: "L", ArrowRight: "R", w: "U", s: "D", a: "L", d: "R" };
     const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
     if (map[k]) { e.preventDefault(); onDirection(map[k]); }
     else if (e.code === "Space" || k === "Enter") { e.preventDefault(); toggle(); }
-    else if (k === "r") resetGame();
+    else if (k === "r" && !submitting) resetGame();
 });
 
-// Swipes anywhere on the screen area
 let sx = 0, sy = 0;
-const lcd = document.querySelector(".lcd");
-lcd.addEventListener("touchstart", e => { const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; }, { passive: true });
-lcd.addEventListener("touchend", e => {
+const lcdEl = document.querySelector(".lcd");
+lcdEl.addEventListener("touchstart", e => { const t = e.changedTouches[0]; sx = t.clientX; sy = t.clientY; }, { passive: true });
+lcdEl.addEventListener("touchend", e => {
     const t = e.changedTouches[0], dx = t.clientX - sx, dy = t.clientY - sy;
     if (Math.max(Math.abs(dx), Math.abs(dy)) < 18) { toggle(); return; }
-    onDirection(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "right" : "left") : (dy > 0 ? "down" : "up"));
+    onDirection(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? "R" : "L") : (dy > 0 ? "D" : "U"));
 }, { passive: true });
 
 document.addEventListener("visibilitychange", () => { if (document.hidden) pause(); });
 
 /* ================= Tabs ================= */
 let currentTab = "game";
+let boardTimer = null;
 
 function showTab(name) {
     if (name === currentTab) return;
@@ -880,45 +874,147 @@ function showTab(name) {
     haptic("select");
     document.querySelectorAll(".tab").forEach(t => t.classList.toggle("active", t.id === "tab-" + name));
     document.querySelectorAll(".tabbar button").forEach(b => b.classList.toggle("on", b.dataset.tab === name));
+    if (tg && tg.BackButton && tgAtLeast("6.1")) name === "game" ? tg.BackButton.hide() : tg.BackButton.show();
 
-    if (tg && tg.BackButton && tgAtLeast("6.1")) {
-        name === "game" ? tg.BackButton.hide() : tg.BackButton.show();
-    }
+    clearInterval(boardTimer);
     if (name === "game" && needRelayout) requestAnimationFrame(layout);
-    if (name === "top") renderTop();
+    if (name === "top") {
+        $("topDot").style.display = "none";
+        loadBoard();
+        boardTimer = setInterval(loadBoard, 30000);
+    }
     if (name === "profile") renderProfile();
 }
-
 document.querySelectorAll(".tabbar button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
-if (tg && tg.BackButton) tg.BackButton.onClick(() => showTab("game"));
+if (tg && tg.BackButton) tg.BackButton.onClick(() => {
+    if ($("sheet").classList.contains("open")) closeSheet(); else showTab("game");
+});
+$("prizeChip").addEventListener("click", () => showTab("top"));
+$("btnPlayNow").addEventListener("click", () => { showTab("game"); });
 
-/* ---------- Top tab ---------- */
-function fmtDate(ts) {
-    const d = new Date(ts);
-    return pad(d.getDate(), 2) + "." + pad(d.getMonth() + 1, 2) + " " + pad(d.getHours(), 2) + ":" + pad(d.getMinutes(), 2);
+/* ================= Leaderboard ================= */
+let board = "score";
+let boardCache = {};
+
+function money(v) { return "$" + v; }
+
+function renderBoard() {
+    const data = boardCache[board];
+    const list = $("boardList");
+    $("boardHint").textContent = board === "ref" ? "Друзі, які реально зіграли" : "Найкращий результат за конкурс";
+    if (!API_BASE) {
+        list.innerHTML = '<div class="empty">Рейтинг гравців з\'явиться після запуску сервера.</div>';
+        $("boardCount").textContent = ""; return;
+    }
+    if (!data) { list.innerHTML = '<div class="skeleton"></div>'.repeat(5); return; }
+    if (data.error) { list.innerHTML = '<div class="empty">Не вдалося завантажити рейтинг.<br>Спробуй пізніше.</div>'; return; }
+
+    const prizes = (contest || data.contest || {})[board === "ref" ? "prizesRef" : "prizesScore"] || [];
+    $("boardCount").textContent = data.total ? data.total + " у рейтингу" : "";
+    if (!data.rows.length) {
+        list.innerHTML = '<div class="empty">' + (board === "ref" ? "Поки ніхто не запросив друзів.<br>Стань першим!" : "Ще немає результатів.<br>Зіграй першим!") + "</div>";
+        return;
+    }
+    const row = r => {
+        const prize = prizes[r.rank - 1];
+        return `<div class="row${r.me ? " me" : ""}">
+            <div class="rank${r.rank <= 3 ? " r" + r.rank : ""}">${r.rank}</div>
+            <div class="who"><b>${escapeHtml(r.name)}${r.me ? " (ти)" : ""}</b>${prize ? `<span>${money(prize)}</span>` : ""}</div>
+            <div class="pts">${r.value}</div></div>`;
+    };
+    let html = data.rows.map(row).join("");
+    if (data.me && data.me.rank) html += '<div class="sep">• • •</div>' + row(data.me);
+    list.innerHTML = html;
 }
 
-function renderTop() {
-    $("topBest").textContent = data.best;
-    $("topBestSub").textContent = data.games ? `Зіграно ігор: ${data.games}` : "Зіграй першу гру";
-    const list = $("topList");
-    if (!data.top.length) { list.innerHTML = '<div class="empty">Тут з\'являться твої найкращі результати</div>'; return; }
-    list.innerHTML = data.top.map((g, i) => `
-        <div class="row">
-            <div class="rank ${i === 0 ? "gold" : ""}">${i + 1}</div>
-            <div class="meta"><b>${g.m === "wrap" ? "Без стін" : "Класика"} · довжина ${g.l}</b><span>${fmtDate(g.d)}</span></div>
-            <div class="pts">${g.s}</div>
-        </div>`).join("");
+async function loadBoard() {
+    if (!API_BASE) { renderBoard(); return; }
+    const b = board;
+    try {
+        const d = await api("/api/leaderboard?board=" + b);
+        boardCache[b] = d;
+        if (d.contest) contest = d.contest;
+        renderContest();
+    } catch (e) {
+        if (!boardCache[b]) boardCache[b] = { error: true };
+    }
+    if (b === board) renderBoard();
 }
 
-$("btnShare").addEventListener("click", () => {
-    const text = `Мій рекорд у GGSNAKE — ${data.best} очок! Спробуй побити 🐍`;
-    const url = "https://t.me/share/url?url=" + encodeURIComponent(BOT_LINK) + "&text=" + encodeURIComponent(text);
+document.querySelectorAll("#segBoard button").forEach(btn => btn.addEventListener("click", () => {
+    board = btn.dataset.v;
+    document.querySelectorAll("#segBoard button").forEach(x => x.classList.toggle("on", x === btn));
+    haptic("select");
+    renderBoard(); loadBoard();
+}));
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+/* ================= Contest ================= */
+function renderContest() {
+    if (!contest || !contest.pool) { $("contestCard").style.display = "none"; $("prizeChip").style.display = "none"; return; }
+    $("contestCard").style.display = "";
+    $("prizeChip").style.display = "";
+    $("cPool").textContent = money(contest.pool);
+    $("chipPool").textContent = money(contest.pool);
+    $("cCurrency").textContent = contest.currency || "USDT";
+    const sum = a => a.reduce((x, y) => x + y, 0);
+    $("cScoreSum").textContent = money(sum(contest.prizesScore));
+    $("cRefSum").textContent = money(sum(contest.prizesRef));
+    $("cScorePlaces").textContent = "топ-" + contest.prizesScore.length + " · 1 місце " + money(contest.prizesScore[0] || 0);
+    $("cRefPlaces").textContent = "топ-" + contest.prizesRef.length + " · 1 місце " + money(contest.prizesRef[0] || 0);
+    $("refNote").textContent = `Друг зараховується, коли зіграє ${contest.refMinGames} гри і набере ${contest.refMinScore}+ очок у рейтинговому режимі.`;
+    tickCountdown();
+}
+
+function tickCountdown() {
+    if (!contest || !contest.endsAt) return;
+    const left = Date.parse(contest.endsAt) - Date.now();
+    if (left <= 0) {
+        $("countdown").style.display = "none"; $("cEnded").style.display = "";
+        $("chipTime").textContent = "фініш"; return;
+    }
+    const d = Math.floor(left / 86400000), h = Math.floor(left / 3600000) % 24,
+          m = Math.floor(left / 60000) % 60, s = Math.floor(left / 1000) % 60;
+    $("cdD").textContent = d; $("cdH").textContent = pad(h, 2); $("cdM").textContent = pad(m, 2); $("cdS").textContent = pad(s, 2);
+    $("chipTime").textContent = d > 0 ? `${d}д ${pad(h, 2)}г` : `${pad(h, 2)}:${pad(m, 2)}:${pad(s, 2)}`;
+}
+setInterval(tickCountdown, 1000);
+
+/* ================= Invite ================= */
+function refLink() { return me ? me.refLink : BOT_LINK; }
+
+function renderInvite() {
+    $("invActive").textContent = me ? me.refActive : 0;
+    $("invTotal").textContent = me ? me.refTotal : 0;
+    $("invRank").textContent = me && me.refRank ? "#" + me.refRank : "—";
+    $("refLink").textContent = me ? me.refLink.replace("https://", "") : (inTelegram ? "Завантаження..." : "Відкрий гру в Telegram");
+}
+
+$("btnInvite").addEventListener("click", () => {
+    const pool = contest && contest.pool ? ` Розіграш ${money(contest.pool)}!` : "";
+    const text = `Граю в GGSNAKE — класична змійка в Telegram.${pool} Заходь 🐍`;
+    const url = "https://t.me/share/url?url=" + encodeURIComponent(refLink()) + "&text=" + encodeURIComponent(text);
     haptic("medium");
     if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank");
 });
 
-/* ---------- Profile tab ---------- */
+$("btnCopy").addEventListener("click", async () => {
+    const link = refLink();
+    let ok = false;
+    try { await navigator.clipboard.writeText(link); ok = true; } catch (e) {
+        const ta = document.createElement("textarea");
+        ta.value = link; document.body.appendChild(ta); ta.select();
+        try { ok = document.execCommand("copy"); } catch (e2) {}
+        ta.remove();
+    }
+    haptic(ok ? "success" : "error");
+    toast(ok ? "Посилання скопійовано" : "Не вдалося скопіювати", ok ? "good" : "bad");
+});
+
+/* ================= Profile ================= */
 function renderProfile() {
     const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
     if (u) {
@@ -926,21 +1022,25 @@ function renderProfile() {
         $("userName").textContent = name || "Гравець";
         $("userHandle").textContent = u.username ? "@" + u.username : "Telegram";
         const av = $("avatar");
-        if (u.photo_url) {
+        if (u.photo_url && !av.querySelector("img")) {
             av.innerHTML = "";
             const img = document.createElement("img");
-            img.src = u.photo_url; img.alt = "";
+            img.src = u.photo_url; img.alt = ""; img.referrerPolicy = "no-referrer";
             av.appendChild(img);
-        } else {
-            av.textContent = (name || "G")[0].toUpperCase();
-        }
+        } else if (!u.photo_url) av.textContent = (name || "G")[0].toUpperCase();
     }
-    $("stGames").textContent = data.games;
-    $("stBest").textContent = data.best;
-    $("stAvg").textContent = data.games ? Math.round(data.total / data.games) : 0;
-    $("stFood").textContent = data.food;
-    $("stLen").textContent = data.maxLen;
-    $("stTime").textContent = Math.round(data.time / 60000);
+    const ob = $("offlineBanner");
+    if (!inTelegram) { ob.style.display = ""; $("offlineText").textContent = "Відкрий гру в Telegram, щоб твої результати потрапили в рейтинг."; }
+    else if (!API_BASE) { ob.style.display = ""; $("offlineText").textContent = "Рейтинг запрацює після запуску сервера. Зараз результати зберігаються тільки на цьому пристрої."; }
+    else ob.style.display = "none";
+
+    $("stBest").textContent = bestShown();
+    $("stRank").textContent = me && me.scoreRank ? "#" + me.scoreRank : "—";
+    const games = Math.max(local.games, me ? me.games : 0);
+    $("stGames").textContent = games;
+    $("stAvg").textContent = me && me.games ? Math.round(me.totalScore / me.games) : (local.games ? Math.round(local.total / local.games) : 0);
+    $("stFood").textContent = local.food;
+    $("stTime").textContent = Math.round(local.time / 60000);
 
     document.querySelectorAll("#segMode button").forEach(b => b.classList.toggle("on", b.dataset.v === settings.mode));
     document.querySelectorAll("#segControls button").forEach(b => b.classList.toggle("on", b.dataset.v === settings.controls));
@@ -948,7 +1048,6 @@ function renderProfile() {
     $("tglHaptic").classList.toggle("on", settings.haptic);
 }
 
-// theme swatches
 $("swatches").innerHTML = Object.entries(THEMES).map(([k, t]) =>
     `<button class="sw" data-v="${k}" style="background:${t.lcd};--dot:${t.ink}" aria-label="${k}"></button>`).join("");
 
@@ -959,50 +1058,101 @@ function applySettings() {
     $("controls").classList.toggle("hidden", settings.controls === "swipe");
 }
 
-function changeSetting(key, val, affectsGrid) {
+function changeSetting(key, val, restart) {
     if (settings[key] === val) return;
     settings[key] = val;
-    saveSettings();
-    applySettings();
-    haptic("select");
-    if (affectsGrid) {
-        // grid size / rules changed: start fresh on return to the game
-        if (state === "running" || state === "paused") { trackTime(); }
-        state = "idle";
-        needRelayout = true;
-    }
-    updateHud();
-    draw();
-    renderProfile();
+    saveSettings(); applySettings(); haptic("select");
+    if (restart) { needRelayout = true; resetGame(true); }
+    updateHud(); draw(); renderProfile();
 }
-
 document.querySelectorAll("#segMode button").forEach(b => b.addEventListener("click", () => changeSetting("mode", b.dataset.v, true)));
 document.querySelectorAll("#segControls button").forEach(b => b.addEventListener("click", () => changeSetting("controls", b.dataset.v, true)));
 document.querySelectorAll("#swatches .sw").forEach(b => b.addEventListener("click", () => changeSetting("theme", b.dataset.v, false)));
-$("tglHaptic").addEventListener("click", () => {
-    settings.haptic = !settings.haptic; saveSettings(); renderProfile(); haptic("select");
-});
+$("tglHaptic").addEventListener("click", () => { settings.haptic = !settings.haptic; saveSettings(); renderProfile(); haptic("select"); });
 
-$("btnClear").addEventListener("click", () => {
-    const doClear = ok => {
-        if (!ok) return;
-        data = Object.assign({}, DEFAULT_DATA, { top: [] });
-        saveData();
-        renderAll();
-        haptic("success");
-    };
-    const msg = "Скинути всю статистику і рекорди?";
-    if (tgAtLeast("6.2")) tg.showConfirm(msg, doClear); else doClear(window.confirm(msg));
-});
+/* ================= Rules / privacy ================= */
+function fmtDate(iso) {
+    try {
+        return new Date(iso).toLocaleString("uk-UA", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+    } catch (e) { return iso; }
+}
 
-function renderAll() { updateHud(); renderTop(); renderProfile(); draw(); }
+function rulesHtml() {
+    const c = contest || { pool: 1000, currency: "USDT", prizesScore: [300, 150, 75, 40, 35], prizesRef: [200, 100, 50, 25, 25], refMinGames: 3, refMinScore: 50, endsAt: null };
+    const list = a => a.map((p, i) => `<li>${i + 1} місце — ${money(p)}</li>`).join("");
+    return `
+<h4>1. Організатор</h4>
+<p>Розіграш проводить команда GGSNAKE (бот @ggsnake_game_bot). Зв'язок: ${escapeHtml(ORGANIZER_CONTACT)}.
+Telegram не є організатором, спонсором чи партнером цього розіграшу.</p>
+<h4>2. Строки</h4>
+<p>Розіграш триває до ${c.endsAt ? fmtDate(c.endsAt) : "дати, оголошеної в боті"} (час вашого пристрою). Результати після цього моменту не враховуються.</p>
+<h4>3. Хто може брати участь</h4>
+<ul><li>Повнолітні користувачі Telegram.</li><li>Один гравець — один акаунт. Мультиакаунти дискваліфікуються.</li></ul>
+<h4>4. Призовий фонд — ${money(c.pool)} ${escapeHtml(c.currency)}</h4>
+<p><b>Рекорди</b> — найвищий результат у рейтинговому режимі:</p><ul>${list(c.prizesScore)}</ul>
+<p><b>Друзі</b> — найбільше зарахованих друзів:</p><ul>${list(c.prizesRef)}</ul>
+<p>Друг зараховується, якщо він новий гравець, перейшов за вашим посиланням, зіграв щонайменше ${c.refMinGames} рейтингові гри і набрав ${c.refMinScore}+ очок.
+При однаковому результаті вище той, хто досяг його раніше.</p>
+<h4>5. Чесна гра</h4>
+<ul>
+<li>Кожна рейтингова гра перевіряється на сервері: сервер повністю перепроходить її і сам рахує очки.</li>
+<li>Заборонено: боти, скрипти, автоклікери, зміна коду гри, накрутка фейкових друзів.</li>
+<li>Перед виплатою організатор переглядає записи ігор і запрошених друзів переможців і може дискваліфікувати за порушення.</li>
+</ul>
+<h4>6. Виплата</h4>
+<p>Переможців оголосимо в боті протягом 3 днів після завершення. Переможець має відповісти протягом 72 годин і надати адресу гаманця USDT або TON (наприклад, Telegram Wallet).
+Виплата — протягом 7 днів після підтвердження. Якщо переможець не відповів, приз переходить до наступного місця.</p>
+<h4>7. Інше</h4>
+<ul>
+<li>Податки та обов'язки за законами своєї країни переможець сплачує самостійно.</li>
+<li>Участь безкоштовна, покупки не потрібні.</li>
+<li>Організатор може змінити правила, повідомивши про це в боті.</li>
+</ul>`;
+}
+
+function privacyHtml() {
+    return `
+<h4>Що ми зберігаємо</h4>
+<ul><li>Telegram ID, ім'я, username, мову.</li><li>Результати ігор, записи рекордних ігор (для перевірки чесності), хто кого запросив.</li></ul>
+<h4>Що бачать інші</h4>
+<p>У рейтингу показується тільки ваше ім'я з Telegram і результат. ID та username не показуються.</p>
+<h4>Навіщо</h4>
+<p>Тільки для роботи гри, рейтингу, захисту від накруток і виплати призів. Ми не продаємо і не передаємо дані третім особам.</p>
+<h4>Видалення</h4>
+<p>Напишіть ${escapeHtml(ORGANIZER_CONTACT)} — ми видалимо ваші дані.</p>
+<h4>На пристрої</h4>
+<p>Налаштування і локальна статистика зберігаються тільки на вашому пристрої.</p>`;
+}
+
+function openSheet(kind) {
+    $("sheetTitle").textContent = kind === "privacy" ? "Конфіденційність" : "Правила розіграшу";
+    $("sheetBody").innerHTML = kind === "privacy" ? privacyHtml() : rulesHtml();
+    $("sheetBody").scrollTop = 0;
+    $("sheet").classList.add("open");
+    pause();
+    if (tg && tg.BackButton && tgAtLeast("6.1")) tg.BackButton.show();
+}
+function closeSheet() {
+    $("sheet").classList.remove("open");
+    if (tg && tg.BackButton && tgAtLeast("6.1") && currentTab === "game") tg.BackButton.hide();
+}
+document.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => openSheet(b.dataset.open)));
+$("sheetClose").addEventListener("click", closeSheet);
 
 /* ================= Boot ================= */
+function renderAll() { updateHud(); renderContest(); renderInvite(); renderProfile(); renderBoard(); draw(); }
+
 applySettings();
-renderProfile();
-renderTop();
+newGame(null);
+renderAll();
 layout();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => draw());
+
+(async () => {
+    await loadMe();
+    if (isRankedMode()) resetGame(true);
+    if (API_BASE) loadBoard();
+})();
 </script>
 </body>
 </html>
