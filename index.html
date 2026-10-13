@@ -108,6 +108,8 @@ main { flex: 1; min-height: 0; position: relative; }
 .lcd::after { content: ""; position: absolute; inset: 0; background: linear-gradient(165deg, rgba(255, 255, 255, .14) 0%, transparent 30%); pointer-events: none; }
 .hud { flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center; font-size: 22px; line-height: 1; padding: 0 2px; }
 .hud.bottom { font-size: 18px; opacity: .85; }
+.lcd.shake { animation: lcdShake .4s steps(2) 1; }
+@keyframes lcdShake { 0%,100% { transform: translate(0,0); } 20% { transform: translate(-3px,1px); } 40% { transform: translate(3px,-1px); } 60% { transform: translate(-2px,0); } 80% { transform: translate(2px,1px); } }
 .stage { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; padding: 4px 0; }
 #game { display: block; touch-action: none; }
 
@@ -521,6 +523,10 @@ main { flex: 1; min-height: 0; position: relative; }
                     <div class="swatches" id="swatches"></div>
                 </div>
                 <div class="setting">
+                    <div class="l"><b data-i18n="set_sound">Звуки 8-біт</b><span data-i18n="set_sound_hint">Як на старому телефоні</span></div>
+                    <button class="toggle" id="tglSound" aria-label="8-bit"></button>
+                </div>
+                <div class="setting">
                     <div class="l"><b data-i18n="set_haptic">Вібрація</b></div>
                     <button class="toggle" id="tglHaptic" aria-label="Вібрація"></button>
                 </div>
@@ -602,7 +608,7 @@ const THEMES = {
     neon:  { lcd: "#0c120e", ink: "#b8f34a" }
 };
 const DEFAULT_DATA = { best: 0, games: 0, food: 0, total: 0, time: 0 };
-const DEFAULT_SET = { mode: "classic", controls: "buttons", theme: "green", haptic: true };
+const DEFAULT_SET = { mode: "classic", controls: "buttons", theme: "green", haptic: true, sound: true };
 
 function readLS(key, def) {
     try { return Object.assign({}, def, JSON.parse(localStorage.getItem(key)) || {}); }
@@ -625,6 +631,42 @@ function haptic(type) {
         else h.impactOccurred(type || "light");
     } catch (e) {}
 }
+
+/* ---------- 8-bit sounds (synthesised, no files) ---------- */
+const Sound = (() => {
+    let ac = null;
+    function ctxOk() {
+        if (!settings.sound) return null;
+        try {
+            if (!ac) { const C = window.AudioContext || window.webkitAudioContext; if (!C) return null; ac = new C(); }
+            if (ac.state === "suspended") ac.resume();
+        } catch (e) { return null; }
+        return ac;
+    }
+    function note(f, start, dur, vol, type) {
+        const c = ctxOk(); if (!c) return;
+        const o = c.createOscillator(), g = c.createGain();
+        o.type = type || "square"; o.frequency.value = f;
+        const t0 = c.currentTime + start, v = vol || 0.05;
+        g.gain.setValueAtTime(v, t0);
+        g.gain.setValueAtTime(v, t0 + dur * 0.8);
+        g.gain.linearRampToValueAtTime(0.0001, t0 + dur);
+        o.connect(g); g.connect(c.destination);
+        o.start(t0); o.stop(t0 + dur + 0.02);
+    }
+    return {
+        unlock() { ctxOk(); },
+        key() { note(1800, 0, 0.025, 0.02); },
+        eat() { note(988, 0, 0.05); note(1319, 0.05, 0.07); },
+        bonus() { [1047, 1319, 1568, 2093].forEach((f, i) => note(f, i * 0.06, 0.07)); },
+        combo() { note(1568, 0, 0.05, 0.04); },
+        level() { [523, 659, 784, 1047, 784, 1047].forEach((f, i) => note(f, i * 0.1, 0.11, 0.06)); },
+        die() { [392, 330, 262, 196].forEach((f, i) => note(f, i * 0.12, 0.14, 0.06)); },
+        count() { note(880, 0, 0.08); },
+        go() { note(1760, 0, 0.18); }
+    };
+})();
+document.addEventListener("pointerdown", () => Sound.unlock(), { once: true });
 
 let toastT = null;
 function toast(msg, kind) {
@@ -767,6 +809,15 @@ function draw() {
     ctx.setLineDash([]);
 
     ctx.fillStyle = t.ink;
+    // maze walls: solid blocks like the original
+    for (const w of game.walls) ctx.fillRect(w.x * U, w.y * U, U, U);
+    // bonus creature (blinks faster when it is about to leave)
+    if (game.bonus && (game.bonus.ttl > 10 || game.bonus.ttl % 2 === 0)) {
+        const q = U / 4, bx = game.bonus.x * U, by = game.bonus.y * U;
+        [[1, 0], [3, 0], [0, 1], [1, 1], [2, 1], [3, 1], [1, 2], [2, 2], [0, 3], [3, 3]]
+            .forEach(([px, py]) => ctx.fillRect(bx + px * q, by + py * q, q, q));
+        ctx.fillRect(0, 0, W * game.bonus.ttl / 30, 3);
+    }
     if (game.food) {
         const q = U / 4, fx = game.food.x * U, fy = game.food.y * U;
         ctx.fillRect(fx + q * 1.5, fy + q * 0.5, q, q);
@@ -791,6 +842,13 @@ function draw() {
         ctx.fillRect(h.x * U + e[0], h.y * U + e[1], 3, 3);
     }
 
+    // eat particles and score popups
+    ctx.fillStyle = t.ink;
+    for (const p of fx) ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+    ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.font = "20px VT323, monospace";
+    for (const p of pops) ctx.fillText(p.text, p.x, p.y);
+
+    if (banner) { panel(banner); return; }
     if (countText) { panel([countText, "GGSNAKE"]); return; }
     if (state === "idle") panel(["SNAKE", tr("cv_press")]);
     if (state === "paused") panel([tr("cv_pause"), tr("cv_press")]);
@@ -804,6 +862,18 @@ function draw() {
 }
 let lastResult = "";
 let countText = null;
+let banner = null;
+let fx = [], pops = [];
+
+function spawnFx(cx, cy, text) {
+    const x = cx * U + U / 2, y = cy * U + U / 2;
+    [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([dx, dy]) => fx.push({ x, y, dx: dx * 5, dy: dy * 5, life: 4 }));
+    if (text) pops.push({ x, y: y - 8, text, life: 7 });
+}
+function stepFx() {
+    fx = fx.filter(p => { p.x += p.dx; p.y += p.dy; return --p.life > 0; });
+    pops = pops.filter(p => { p.y -= 3; return --p.life > 0; });
+}
 
 /* ---------- HUD ---------- */
 function updateHud() {
@@ -812,7 +882,7 @@ function updateHud() {
     $("best").textContent = "HI " + pad(Math.max(bestShown(), state === "running" ? score : 0), 4);
     $("level").textContent = "LV" + (game ? game.level() : 1);
     $("modeLabel").textContent = settings.mode === "wrap" ? tr("mode_training") : (online() ? tr("mode_ranked") : tr("mode_offline"));
-    const hints = { idle: tr("hint_idle"), running: tr("hint_running"), paused: tr("hint_paused"), over: tr("hint_over"), win: tr("hint_over") };
+    const hints = { idle: tr("hint_idle"), running: game ? tr("hint_next", { n: game.applesLeft(), m: game.level() + 1 }) : tr("hint_running"), paused: tr("hint_paused"), over: tr("hint_over"), win: tr("hint_over") };
     $("hint").textContent = hints[state];
     const running = state === "running";
     $("playIcon").setAttribute("href", running ? "#i-pause" : "#i-play");
@@ -855,6 +925,7 @@ async function play() {
         } else ranked = false;
     }
     state = "running";
+    banner = null;
     playStart = Date.now();
     schedule();
     updateHud(); draw();
@@ -872,7 +943,10 @@ function toggle() { state === "running" ? pause() : play(); }
 async function finish(result) {
     state = result;
     stopTimer(); trackTime();
+    banner = null; fx = []; pops = [];
     haptic(result === "win" ? "success" : "error");
+    if (result === "win") Sound.level(); else Sound.die();
+    lcdEl.classList.remove("shake"); void lcdEl.offsetWidth; lcdEl.classList.add("shake");
 
     local.games++; local.food += game.eaten; local.total += game.score;
     if (settings.mode === "wrap") local.bestWrap = Math.max(local.bestWrap || 0, game.score);
@@ -923,15 +997,28 @@ function tick() {
     if (state !== "running") return;
     const turn = queue.length ? queue.shift() : null;
     const t = game.ticks;
-    const lvBefore = game.level();
+    const head = game.snake[0];
     const ev = game.step(turn);
-    if (ev.turned) turns.push(t + ":" + game.dir);
+    if (ev.turned) turns.push(t + ":" + turn);
+    stepFx();
 
     if (ev.dead) { finish("over"); return; }
     if (ev.won) { finish("win"); return; }
-    if (ev.ate) {
-        haptic("light");
-        if (game.level() !== lvBefore) haptic("medium");
+    if (ev.levelUp) {
+        queue = []; fx = []; pops = [];
+        banner = [tr("cv_level", { n: game.level() }), tr("cv_newmap"), "+" + ev.points];
+        Sound.level(); haptic("success");
+        updateHud(); draw();
+        stopTimer();
+        timer = setTimeout(() => { banner = null; timer = null; if (state === "running") { draw(); schedule(); } }, 1700);
+        return;
+    }
+    if (ev.ate || ev.bonus) {
+        const h = game.snake[0];
+        spawnFx(h.x, h.y, "+" + ev.points);
+        if (ev.bonus) { Sound.bonus(); haptic("medium"); }
+        else if (ev.combo) { Sound.combo(); Sound.eat(); haptic("light"); }
+        else { Sound.eat(); haptic("light"); }
     }
     updateHud(); draw();
     schedule();
@@ -945,6 +1032,7 @@ function turn(dir) {
 }
 function onDirection(dir) {
     haptic("light");
+    Sound.key();
     if (state === "idle" || state === "paused") { if (state === "paused") turn(dir); play().then(() => { if (state === "running" && game.ticks === 0) turn(dir); }); return; }
     if (state === "running") turn(dir);
 }
@@ -1167,6 +1255,7 @@ function renderProfile() {
     document.querySelectorAll("#segControls button").forEach(b => b.classList.toggle("on", b.dataset.v === settings.controls));
     document.querySelectorAll("#swatches .sw").forEach(b => b.classList.toggle("on", b.dataset.v === settings.theme));
     $("tglHaptic").classList.toggle("on", settings.haptic);
+    $("tglSound").classList.toggle("on", settings.sound !== false);
 }
 
 $("swatches").innerHTML = Object.entries(THEMES).map(([k, t]) =>
@@ -1189,6 +1278,7 @@ function changeSetting(key, val, restart) {
 document.querySelectorAll("#segMode button").forEach(b => b.addEventListener("click", () => changeSetting("mode", b.dataset.v, true)));
 document.querySelectorAll("#segControls button").forEach(b => b.addEventListener("click", () => changeSetting("controls", b.dataset.v, true)));
 document.querySelectorAll("#swatches .sw").forEach(b => b.addEventListener("click", () => changeSetting("theme", b.dataset.v, false)));
+$("tglSound").addEventListener("click", () => { settings.sound = settings.sound === false; saveSettings(); renderProfile(); Sound.eat(); });
 $("tglHaptic").addEventListener("click", () => { settings.haptic = !settings.haptic; saveSettings(); renderProfile(); haptic("select"); });
 
 /* ================= Rules / privacy ================= */
@@ -1329,6 +1419,7 @@ async function splashPlay() {
     if (splash.done || splash.el.classList.contains("loading")) return;
     haptic("medium");
     splash.el.classList.add("loading");
+    Sound.unlock();
     const minWait = new Promise(r => setTimeout(r, 1200));
     const ready = Promise.race([bootReady, new Promise(r => setTimeout(r, 3500))]);
     await Promise.all([minWait, ready]);
@@ -1349,10 +1440,11 @@ function startCountdown() {
     let i = 0;
     const step = () => {
         if (i < seq.length) {
-            countText = seq[i++]; draw(); haptic("light");
+            countText = seq[i++]; draw(); haptic("light"); Sound.count();
             setTimeout(step, 550);
         } else {
             countText = null;
+            Sound.go();
             if (state === "idle") play(); else draw();
         }
     };

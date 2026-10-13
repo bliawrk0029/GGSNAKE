@@ -49,17 +49,17 @@ async function call(method, path, { id, body, start, raw } = {}) {
 }
 
 // Greedy bot that plays through the shared engine and records turns like the client does
-function botPlay(seed, maxScore = Infinity) {
+function botPlay(seed, maxScore = 300) {
     const g = E.create({ seed }); const rec = []; let ms = 0;
     const V = { U: [0, -1], D: [0, 1], L: [-1, 0], R: [1, 0] }, O = { U: "D", D: "U", L: "R", R: "L" };
     while (g.alive) {
         const h = g.snake[0], f = g.food;
-        const safe = d => { const x = h.x + V[d][0], y = h.y + V[d][1]; return x >= 0 && y >= 0 && x < 20 && y < 24 && !g.snake.slice(0, -1).some(p => p.x === x && p.y === y); };
+        const safe = d => { const x = h.x + V[d][0], y = h.y + V[d][1]; return x >= 0 && y >= 0 && x < 20 && y < 24 && !g.isWall(x, y) && !g.snake.slice(0, -1).some(p => p.x === x && p.y === y); };
         let want;
-        if (g.score >= maxScore) want = ["U", "D", "L", "R"].find(d => d !== O[g.dir] && !safe(d)) || g.dir; // crash on purpose
+        if (g.score >= maxScore || g.ticks > 3000) want = ["U", "D", "L", "R"].find(d => d !== O[g.dir] && !safe(d)) || g.dir; // crash on purpose
         else { const o = []; if (f.x > h.x) o.push("R"); if (f.x < h.x) o.push("L"); if (f.y > h.y) o.push("D"); if (f.y < h.y) o.push("U");
             want = o.find(d => safe(d) && d !== O[g.dir]) || ["U", "D", "L", "R"].find(d => safe(d) && d !== O[g.dir]); }
-        ms += g.interval(); const t = g.ticks; const ev = g.step(want); if (ev.turned) rec.push(t + ":" + g.dir);
+        ms += g.interval(); const t = g.ticks; const ev = g.step(want); if (ev.turned) rec.push(t + ":" + want);
     }
     return { score: g.score, turns: rec.join(","), ms };
 }

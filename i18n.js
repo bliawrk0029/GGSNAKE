@@ -315,6 +315,19 @@
         }
     };
 
+
+    var EXTRA = {
+        uk: { hint_next: "ще {n} до LV{m}", cv_level: "РІВЕНЬ {n}", cv_newmap: "нова карта", set_sound: "Звуки 8-біт", set_sound_hint: "Як на старому телефоні" },
+        en: { hint_next: "{n} to LV{m}", cv_level: "LEVEL {n}", cv_newmap: "new maze", set_sound: "8-bit sounds", set_sound_hint: "Just like the old phone" },
+        ru: { hint_next: "ещё {n} до LV{m}", cv_level: "УРОВЕНЬ {n}", cv_newmap: "новая карта", set_sound: "Звуки 8-бит", set_sound_hint: "Как на старом телефоне" },
+        es: { hint_next: "{n} para LV{m}", cv_level: "NIVEL {n}", cv_newmap: "nuevo mapa", set_sound: "Sonidos 8 bits", set_sound_hint: "Como en el móvil de antes" },
+        pt: { hint_next: "{n} p/ LV{m}", cv_level: "NÍVEL {n}", cv_newmap: "novo mapa", set_sound: "Sons 8 bits", set_sound_hint: "Como no celular antigo" },
+        de: { hint_next: "{n} bis LV{m}", cv_level: "LEVEL {n}", cv_newmap: "neues Labyrinth", set_sound: "8-Bit-Sounds", set_sound_hint: "Wie auf dem alten Handy" },
+        pl: { hint_next: "{n} do LV{m}", cv_level: "POZIOM {n}", cv_newmap: "nowa mapa", set_sound: "Dźwięki 8-bit", set_sound_hint: "Jak w starym telefonie" },
+        tr: { hint_next: "LV{m}: {n}", cv_level: "SEVİYE {n}", cv_newmap: "yeni harita", set_sound: "8-bit sesler", set_sound_hint: "Eski telefondaki gibi" }
+    };
+    for (var lg in EXTRA) for (var k in EXTRA[lg]) D[lg][k] = EXTRA[lg][k];
+
     /* Long legal texts: Ukrainian, English and Russian; other languages show English. */
     function rulesHtml(lang, a) {
         var L = a.list;
