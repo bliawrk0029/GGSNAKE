@@ -8,8 +8,9 @@
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=VT323&family=Unbounded:wght@700;900&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=VT323&family=Unbounded:wght@700;900&family=Manrope:wght@500;600;700;800&family=Jersey+10&family=Caveat:wght@700&family=Silkscreen&display=swap" rel="stylesheet">
 <script src="engine.js"></script>
+<script src="i18n.js"></script>
 <style>
 :root {
     --vh: 100vh;
@@ -267,6 +268,73 @@ main { flex: 1; min-height: 0; position: relative; }
 .tabbar svg { width: 22px; height: 22px; }
 .tabbar button.on { color: var(--accent); }
 .tabbar .dot { position: absolute; top: 4px; left: calc(50% + 8px); width: 8px; height: 8px; border-radius: 50%; background: var(--gold); }
+
+/* ---------- Splash ---------- */
+.splash { position: absolute; inset: 0; z-index: 50; overflow: hidden; background: #040705; color: #eaf3e0; transition: opacity .4s ease, transform .4s ease; }
+.splash.hide { opacity: 0; transform: scale(1.06); pointer-events: none; }
+.splash .layer { position: absolute; inset: 0; pointer-events: none; }
+.sp-rays { position: absolute; left: 38%; top: 62%; width: 1100px; height: 1100px; background: repeating-conic-gradient(from 0deg, rgba(198,255,61,.12) 0deg 7deg, transparent 7deg 22deg); -webkit-mask-image: radial-gradient(circle, #000 0%, transparent 55%); mask-image: radial-gradient(circle, #000 0%, transparent 55%); transform: translate(-50%, -50%); animation: spRays 60s linear infinite; }
+.sp-glow { background: radial-gradient(55% 22% at 50% 13%, rgba(61,106,12,.55) 0%, transparent 70%), radial-gradient(45% 30% at 35% 62%, rgba(43,77,8,.4) 0%, transparent 70%); }
+.sp-floor { position: absolute; left: -220px; right: -220px; bottom: -30px; height: 38%; perspective: 240px; }
+.sp-floor div { position: absolute; inset: 0; transform: rotateX(70deg); transform-origin: 50% 100%; background-image: linear-gradient(rgba(198,255,61,.4) 2px, transparent 2px), linear-gradient(90deg, rgba(198,255,61,.33) 2px, transparent 2px); background-size: 46px 46px; animation: spFloor 1s linear infinite; -webkit-mask-image: linear-gradient(transparent 0%, #000 70%); mask-image: linear-gradient(transparent 0%, #000 70%); }
+#spBg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sp-dust span { position: absolute; bottom: 0; background: #c6ff3d; box-shadow: 0 0 8px #c6ff3d; animation: spRise 7s linear infinite; opacity: 0; }
+.sp-dust span:nth-child(4n) { background: #ff2fb3; box-shadow: 0 0 8px #ff2fb3; }
+.sp-vig { background: radial-gradient(120% 80% at 50% 45%, transparent 55%, rgba(0,0,0,.8) 100%); }
+.sp-content { position: absolute; inset: 0; display: flex; flex-direction: column; padding: calc(28px + env(safe-area-inset-top)) 0 calc(24px + env(safe-area-inset-bottom)); }
+.sp-top { display: flex; justify-content: center; align-items: center; gap: 8px; font-family: Silkscreen, monospace; font-size: 12px; letter-spacing: 4px; color: #b7c6a8; }
+.sp-top b { color: #ff2fb3; letter-spacing: -2px; font-weight: 400; animation: spBlink 1s steps(2) infinite; }
+.sp-title { margin: 4px 0 0; text-align: center; font-family: "Jersey 10", Silkscreen, monospace; font-weight: 400; font-size: clamp(76px, 27vw, 112px); line-height: .95; letter-spacing: 2px; color: #c6ff3d; animation: spGlow 2.4s ease-in-out infinite, spGlitch 5s steps(1) infinite; }
+.sp-slogan { margin: 6px 14px 0; text-align: center; font-family: Unbounded, sans-serif; font-weight: 900; font-size: 23px; line-height: 1.15; text-transform: uppercase; color: #fff; }
+.sp-slogan.small { font-size: 19px; }
+.sp-slogan em { font-style: normal; color: #c6ff3d; }
+.sp-stage { position: relative; flex: 1; min-height: 0; }
+.sp-phone-wrap { position: absolute; left: -44px; top: 6px; width: 262px; height: 520px; perspective: 900px; transform-origin: top left; }
+.sp-phone { position: relative; width: 236px; height: 500px; border-radius: 46px 46px 58px 58px; background: radial-gradient(120% 60% at 30% 10%, #3a4550 0%, #1a2027 55%, #0f1317 100%); box-shadow: inset 0 2px 0 rgba(255,255,255,.13), inset 0 -8px 18px rgba(0,0,0,.6), inset 6px 0 10px rgba(255,255,255,.05), 22px 30px 50px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.08), 0 0 60px rgba(198,255,61,.2); transform-origin: 50% 60%; animation: spFloat 5s ease-in-out infinite; }
+.sp-grill { position: absolute; top: 26px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; gap: 5px; }
+.sp-grill i { width: 54px; height: 4px; border-radius: 2px; background: #07090b; box-shadow: 0 1px 0 rgba(255,255,255,.08); }
+.sp-brand { position: absolute; top: 58px; left: 0; right: 0; text-align: center; font-family: "Jersey 10", monospace; font-size: 17px; letter-spacing: 3px; color: #c6ff3d; }
+.sp-bezel { position: absolute; top: 84px; left: 22px; right: 22px; height: 168px; border-radius: 14px 14px 22px 22px; padding: 10px; background: #0b0e10; box-shadow: inset 0 3px 8px #000, 0 1px 0 rgba(255,255,255,.08); }
+.sp-lcd { position: relative; width: 172px; height: 148px; border-radius: 6px; overflow: hidden; background: radial-gradient(90% 90% at 50% 40%, #c9ec7a 0%, #a9d25a 70%, #8fbb45 100%); box-shadow: 0 0 24px rgba(198,255,61,.33); animation: spFlicker 6s infinite; }
+.sp-lcd canvas { position: absolute; inset: 0; width: 172px; height: 148px; }
+.sp-lcd::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(46,61,18,.13) 1px, transparent 1px), linear-gradient(90deg, rgba(46,61,18,.13) 1px, transparent 1px); background-size: 3px 3px; }
+.sp-lcd::after { content: ""; position: absolute; inset: 0; background: linear-gradient(150deg, rgba(255,255,255,.25) 0%, transparent 35%); }
+.sp-nav { position: absolute; top: 268px; left: 30px; right: 30px; display: flex; align-items: center; justify-content: space-between; }
+.sp-nav i { width: 46px; height: 18px; border-radius: 10px; background: #2a333c; box-shadow: inset 0 2px 0 rgba(255,255,255,.1), 0 3px 0 #07090b; }
+.sp-nav i.ok { width: 70px; height: 22px; border-radius: 12px; background: #c6ff3d; box-shadow: inset 0 2px 0 #f0ffc4, 0 3px 0 #5f8a12, 0 0 16px rgba(198,255,61,.5); }
+.sp-keys { position: absolute; top: 310px; left: 26px; right: 26px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px 12px; }
+.sp-keys i { height: 30px; border-radius: 12px; display: flex; align-items: center; justify-content: center; gap: 4px; font-style: normal; font-weight: 800; font-size: 13px; color: #c5ced8; background: #252d35; box-shadow: inset 0 2px 0 rgba(255,255,255,.11), 0 3px 0 #07090b; }
+.sp-keys i.d { color: #e9ffc0; background: #2f3a2a; }
+.sp-keys i small { font-size: 9px; color: #c6ff3d; }
+.sp-bolt { position: absolute; right: 40px; top: 4%; }
+.sp-note { position: absolute; right: 6px; top: 36%; width: 128px; font-family: Caveat, cursive; font-weight: 700; font-size: 26px; line-height: 1; color: #c6ff3d; transform: rotate(-9deg); text-align: center; text-shadow: 0 0 10px #000; }
+.sp-note.small { font-size: 23px; }
+.sp-arrow { position: absolute; right: 36px; top: calc(36% + 112px); }
+.sp-bolt path, .sp-arrow path { stroke-dasharray: 220; animation: spDraw 1.5s ease-out both .4s; }
+.sp-bottom { position: relative; padding: 0 20px; }
+.sp-play { position: relative; overflow: hidden; width: 100%; height: 66px; border-radius: 33px; background: #c6ff3d; color: #0a1203; font-family: Unbounded, sans-serif; font-weight: 900; font-size: 22px; letter-spacing: .5px; text-transform: uppercase; display: flex; align-items: center; justify-content: space-between; padding: 0 28px; animation: spPulse 2s ease-in-out infinite; }
+.sp-play svg { width: 28px; height: 28px; }
+.sp-play .shine { position: absolute; top: 0; bottom: 0; left: 0; width: 46px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.67), transparent); animation: spShine 2.8s ease-in-out infinite; }
+.sp-load { display: none; flex-direction: column; gap: 8px; height: 66px; justify-content: center; }
+.splash.loading .sp-load { display: flex; }
+.splash.loading .sp-play { display: none; }
+.sp-load span { font-family: Silkscreen, monospace; font-size: 12px; color: #c6ff3d; }
+.sp-load div { height: 24px; padding: 3px; border: 2px solid #c6ff3d; border-radius: 6px; box-shadow: 0 0 20px rgba(198,255,61,.33); }
+.sp-load div i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, #c6ff3d 0 12px, transparent 12px 15px); }
+.splash.loading .sp-load div i { animation: spFill 1.2s steps(14) forwards; }
+@keyframes spFloat { 0%,100% { transform: translateY(0) rotate(-13deg) rotateY(16deg) rotateX(4deg); } 50% { transform: translateY(-12px) rotate(-11deg) rotateY(10deg) rotateX(6deg); } }
+@keyframes spGlow { 0%,100% { text-shadow: 0 0 12px #c6ff3d, 0 0 40px rgba(198,255,61,.53), 3px 0 0 rgba(255,47,179,.67), -3px 0 0 rgba(47,230,255,.67); } 50% { text-shadow: 0 0 18px #c6ff3d, 0 0 60px rgba(198,255,61,.67), 2px 0 0 rgba(255,47,179,.4), -2px 0 0 rgba(47,230,255,.4); } }
+@keyframes spGlitch { 0%,90%,100% { transform: translate(0); } 92% { transform: translate(-3px,1px) skewX(-6deg); } 94% { transform: translate(3px,-1px); } 96% { transform: translate(-1px,0) skewX(4deg); } }
+@keyframes spRays { to { transform: translate(-50%,-50%) rotate(360deg); } }
+@keyframes spFloor { from { background-position: 0 0; } to { background-position: 0 46px; } }
+@keyframes spRise { 0% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 100% { transform: translateY(-520px); opacity: 0; } }
+@keyframes spDraw { from { stroke-dashoffset: 220; } to { stroke-dashoffset: 0; } }
+@keyframes spShine { 0% { transform: translateX(-140%) skewX(-20deg); } 55%,100% { transform: translateX(900%) skewX(-20deg); } }
+@keyframes spBlink { 0%,100% { opacity: 1; } 50% { opacity: .2; } }
+@keyframes spFlicker { 0%,47%,100% { opacity: .95; } 48% { opacity: .72; } 49% { opacity: .97; } }
+@keyframes spFill { from { width: 0; } to { width: 100%; } }
+@keyframes spPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(198,255,61,.4), 0 0 30px rgba(198,255,61,.33); } 50% { box-shadow: 0 0 0 10px rgba(198,255,61,0), 0 0 46px rgba(198,255,61,.53); } }
+@media (prefers-reduced-motion: reduce) { .splash *, .splash *::before, .splash *::after { animation: none !important; } }
 </style>
 </head>
 <body>
@@ -288,6 +356,37 @@ main { flex: 1; min-height: 0; position: relative; }
 </svg>
 
 <div class="app">
+    <div class="splash" id="splash">
+        <div class="layer"><div class="sp-rays"></div></div>
+        <div class="layer sp-glow"></div>
+        <div class="sp-floor"><div></div></div>
+        <canvas id="spBg" aria-hidden="true"></canvas>
+        <div class="layer sp-dust"><span style="left:23px;width:3px;height:3px;animation-duration:6s;animation-delay:-0.0s"></span><span style="left:90px;width:5px;height:5px;animation-duration:7s;animation-delay:-0.9s"></span><span style="left:157px;width:7px;height:7px;animation-duration:8s;animation-delay:-1.8s"></span><span style="left:224px;width:3px;height:3px;animation-duration:9s;animation-delay:-2.7s"></span><span style="left:291px;width:5px;height:5px;animation-duration:10s;animation-delay:-3.6s"></span><span style="left:358px;width:7px;height:7px;animation-duration:6s;animation-delay:-4.5s"></span><span style="left:45px;width:3px;height:3px;animation-duration:7s;animation-delay:-5.4s"></span><span style="left:112px;width:5px;height:5px;animation-duration:8s;animation-delay:-6.3s"></span><span style="left:179px;width:7px;height:7px;animation-duration:9s;animation-delay:-7.2s"></span><span style="left:246px;width:3px;height:3px;animation-duration:10s;animation-delay:-8.1s"></span><span style="left:313px;width:5px;height:5px;animation-duration:6s;animation-delay:-9.0s"></span><span style="left:0px;width:7px;height:7px;animation-duration:7s;animation-delay:-9.9s"></span></div>
+        <div class="layer sp-vig"></div>
+        <div class="sp-content">
+            <div class="sp-top"><b>&#9664;&#9664;</b><span data-i18n="splash_top">REWIND TO 2000</span></div>
+            <h1 class="sp-title"><span id="spTitle" style="display:inline-block">GGSNAKE</span></h1>
+            <p class="sp-slogan" id="spSlogan"><span data-i18n="splash_s1"></span><br><em data-i18n="splash_s2"></em></p>
+            <div class="sp-stage" id="spStage">
+                <div class="sp-phone-wrap" id="spPhone">
+                    <div class="sp-phone" role="img" aria-label="GGSNAKE">
+                        <div class="sp-grill"><i></i><i></i><i></i></div>
+                        <div class="sp-brand">GGSNAKE</div>
+                        <div class="sp-bezel"><div class="sp-lcd"><canvas id="spLcd" width="344" height="296"></canvas></div></div>
+                        <div class="sp-nav"><i></i><i class="ok"></i><i></i></div>
+                        <div class="sp-keys"><i>1</i><i class="d">2<small>▲</small></i><i>3</i><i class="d">4<small>◀</small></i><i>5</i><i class="d">6<small>▶</small></i><i>7</i><i class="d">8<small>▼</small></i><i>9</i><i>*</i><i>0</i><i>#</i></div>
+                    </div>
+                </div>
+                <svg class="sp-bolt" aria-hidden="true" width="60" height="96" viewBox="0 0 60 96"><path d="M38 4 L18 44 L34 46 L14 92" fill="none" stroke="#c6ff3d" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div class="sp-note" id="spNote" data-i18n="splash_note"></div>
+                <svg class="sp-arrow" aria-hidden="true" width="80" height="90" viewBox="0 0 80 90"><path d="M60 6 C 70 40, 50 66, 18 78 M18 78 L 34 82 M18 78 L 26 64" fill="none" stroke="#c6ff3d" stroke-width="3" stroke-linecap="round"/></svg>
+            </div>
+            <div class="sp-bottom">
+                <button class="sp-play" id="spPlay"><span data-i18n="play">Play</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span class="shine" aria-hidden="true"></span></button>
+                <div class="sp-load"><span data-i18n="loading">Loading</span><div><i></i></div></div>
+            </div>
+        </div>
+    </div>
     <header class="top">
         <div class="logo">GG<span>SNAKE</span></div>
         <button class="prize-chip" id="prizeChip" style="display:none">
@@ -317,7 +416,7 @@ main { flex: 1; min-height: 0; position: relative; }
             <div class="controls" id="controls">
                 <div class="side">
                     <button class="round" id="btnReset" aria-label="Скинути"><svg><use href="#i-reset"/></svg></button>
-                    <small>СКИНУТИ</small>
+                    <small data-i18n="ctl_reset">СКИНУТИ</small>
                 </div>
                 <div class="dpad">
                     <button class="dp up" data-dir="U" aria-label="Вгору"><svg><use href="#i-arrow"/></svg></button>
@@ -336,45 +435,45 @@ main { flex: 1; min-height: 0; position: relative; }
         <!-- ===== TOP ===== -->
         <section class="tab scroll" id="tab-top">
             <div class="card contest" id="contestCard" style="display:none">
-                <div class="label">Розіграш</div>
+                <div class="label" data-i18n="contest">Розіграш</div>
                 <div class="pool"><span id="cPool">$1000</span> <small id="cCurrency">USDT</small></div>
                 <div class="countdown" id="countdown">
-                    <div><b id="cdD">0</b><span>дні</span></div>
-                    <div><b id="cdH">00</b><span>год</span></div>
-                    <div><b id="cdM">00</b><span>хв</span></div>
-                    <div><b id="cdS">00</b><span>сек</span></div>
+                    <div><b id="cdD">0</b><span data-i18n="cd_d">дні</span></div>
+                    <div><b id="cdH">00</b><span data-i18n="cd_h">год</span></div>
+                    <div><b id="cdM">00</b><span data-i18n="cd_m">хв</span></div>
+                    <div><b id="cdS">00</b><span data-i18n="cd_s">сек</span></div>
                 </div>
-                <div class="ended" id="cEnded" style="display:none">Конкурс завершено. Переможців оголосимо в боті.</div>
+                <div class="ended" id="cEnded" style="display:none" data-i18n="contest_ended">Конкурс завершено. Переможців оголосимо в боті.</div>
                 <div class="splits">
-                    <div class="split"><b>Рекорди</b><em id="cScoreSum">$600</em><span id="cScorePlaces">топ-5</span></div>
-                    <div class="split"><b>Друзі</b><em id="cRefSum">$400</em><span id="cRefPlaces">топ-5</span></div>
+                    <div class="split"><b data-i18n="records">Рекорди</b><em id="cScoreSum">$600</em><span id="cScorePlaces">топ-5</span></div>
+                    <div class="split"><b data-i18n="friends">Друзі</b><em id="cRefSum">$400</em><span id="cRefPlaces">топ-5</span></div>
                 </div>
                 <div class="row-btns">
-                    <button class="btn" id="btnPlayNow"><svg><use href="#i-play"/></svg>Грати</button>
-                    <button class="btn ghost" data-open="rules">Правила</button>
+                    <button class="btn" id="btnPlayNow"><svg><use href="#i-play"/></svg><span data-i18n="play">Грати</span></button>
+                    <button class="btn ghost" data-open="rules" data-i18n="rules">Правила</button>
                 </div>
             </div>
 
             <div class="card">
                 <div class="seg" id="segBoard">
-                    <button data-v="score" class="on">Рекорди</button>
-                    <button data-v="ref">Друзі</button>
+                    <button data-v="score" class="on" data-i18n="records">Рекорди</button>
+                    <button data-v="ref" data-i18n="friends">Друзі</button>
                 </div>
                 <div class="board-meta"><span id="boardHint">Найкращий результат за весь конкурс</span><span id="boardCount"></span></div>
                 <div class="list" id="boardList"></div>
             </div>
 
             <div class="card">
-                <h3>Запроси друзів</h3>
+                <h3 data-i18n="invite_title">Запроси друзів</h3>
                 <div class="invite-stats">
-                    <div><b id="invActive">0</b><span>зараховано</span></div>
-                    <div><b id="invTotal">0</b><span>перейшли за посиланням</span></div>
-                    <div><b id="invRank">—</b><span>місце</span></div>
+                    <div><b id="invActive">0</b><span data-i18n="inv_counted">зараховано</span></div>
+                    <div><b id="invTotal">0</b><span data-i18n="inv_clicked">перейшли за посиланням</span></div>
+                    <div><b id="invRank">—</b><span data-i18n="inv_place">місце</span></div>
                 </div>
                 <div class="linkbox"><code id="refLink">Відкрий гру в Telegram</code></div>
                 <div class="btns2">
-                    <button class="btn" id="btnInvite"><svg><use href="#i-share"/></svg>Запросити</button>
-                    <button class="btn ghost" id="btnCopy"><svg><use href="#i-copy"/></svg>Копіювати</button>
+                    <button class="btn" id="btnInvite"><svg><use href="#i-share"/></svg><span data-i18n="invite">Запросити</span></button>
+                    <button class="btn ghost" id="btnCopy"><svg><use href="#i-copy"/></svg><span data-i18n="copy">Копіювати</span></button>
                 </div>
                 <p class="note" id="refNote">Друг зараховується, коли зіграє 3 гри і набере 50+ очок.</p>
             </div>
@@ -391,52 +490,52 @@ main { flex: 1; min-height: 0; position: relative; }
                 <span id="offlineText">Відкрий гру в Telegram, щоб твої результати потрапили в рейтинг.</span>
             </div>
             <div class="card">
-                <h3>Статистика</h3>
+                <h3 data-i18n="stats">Статистика</h3>
                 <div class="stats">
-                    <div class="stat"><b id="stBest">0</b><span>Рекорд</span></div>
-                    <div class="stat"><b id="stRank">—</b><span>Місце</span></div>
-                    <div class="stat"><b id="stGames">0</b><span>Ігор</span></div>
-                    <div class="stat"><b id="stAvg">0</b><span>Середній</span></div>
-                    <div class="stat"><b id="stFood">0</b><span>З'їдено</span></div>
-                    <div class="stat"><b id="stTime">0</b><span>Хв у грі</span></div>
+                    <div class="stat"><b id="stBest">0</b><span data-i18n="st_best">Рекорд</span></div>
+                    <div class="stat"><b id="stRank">—</b><span data-i18n="st_rank">Місце</span></div>
+                    <div class="stat"><b id="stGames">0</b><span data-i18n="st_games">Ігор</span></div>
+                    <div class="stat"><b id="stAvg">0</b><span data-i18n="st_avg">Середній</span></div>
+                    <div class="stat"><b id="stFood">0</b><span data-i18n="st_food">З'їдено</span></div>
+                    <div class="stat"><b id="stTime">0</b><span data-i18n="st_time">Хв у грі</span></div>
                 </div>
             </div>
             <div class="card">
-                <h3>Налаштування</h3>
+                <h3 data-i18n="settings">Налаштування</h3>
                 <div class="setting">
-                    <div class="l"><b>Режим</b><span>Тренування — без стін, не в рейтинг</span></div>
+                    <div class="l"><b data-i18n="set_mode">Режим</b><span data-i18n="set_mode_hint">Тренування — без стін, не в рейтинг</span></div>
                     <div class="seg small" id="segMode">
-                        <button data-v="classic">Рейтинг</button>
-                        <button data-v="wrap">Тренування</button>
+                        <button data-v="classic" data-i18n="mode_rank">Рейтинг</button>
+                        <button data-v="wrap" data-i18n="mode_train">Тренування</button>
                     </div>
                 </div>
                 <div class="setting">
-                    <div class="l"><b>Керування</b><span>Свайпи — більший екран</span></div>
+                    <div class="l"><b data-i18n="set_controls">Керування</b><span data-i18n="set_controls_hint">Свайпи — більший екран</span></div>
                     <div class="seg small" id="segControls">
-                        <button data-v="buttons">Кнопки</button>
-                        <button data-v="swipe">Свайпи</button>
+                        <button data-v="buttons" data-i18n="ctl_buttons">Кнопки</button>
+                        <button data-v="swipe" data-i18n="ctl_swipes">Свайпи</button>
                     </div>
                 </div>
                 <div class="setting">
-                    <div class="l"><b>Тема екрана</b></div>
+                    <div class="l"><b data-i18n="set_theme">Тема екрана</b></div>
                     <div class="swatches" id="swatches"></div>
                 </div>
                 <div class="setting">
-                    <div class="l"><b>Вібрація</b></div>
+                    <div class="l"><b data-i18n="set_haptic">Вібрація</b></div>
                     <button class="toggle" id="tglHaptic" aria-label="Вібрація"></button>
                 </div>
             </div>
             <div class="links">
-                <button class="btn ghost block" data-open="rules">Правила розіграшу</button>
-                <button class="btn ghost block" data-open="privacy">Конфіденційність</button>
+                <button class="btn ghost block" data-open="rules" data-i18n="rules_full">Правила розіграшу</button>
+                <button class="btn ghost block" data-open="privacy" data-i18n="privacy">Конфіденційність</button>
             </div>
         </section>
     </main>
 
     <nav class="tabbar">
-        <button class="on" data-tab="game"><svg><use href="#i-game"/></svg>Гра</button>
-        <button data-tab="top"><svg><use href="#i-trophy"/></svg>Рейтинг<i class="dot" id="topDot" style="display:none"></i></button>
-        <button data-tab="profile"><svg><use href="#i-user"/></svg>Профіль</button>
+        <button class="on" data-tab="game"><svg><use href="#i-game"/></svg><span data-i18n="tab_game">Гра</span></button>
+        <button data-tab="top"><svg><use href="#i-trophy"/></svg><span data-i18n="tab_top">Рейтинг</span><i class="dot" id="topDot" style="display:none"></i></button>
+        <button data-tab="profile"><svg><use href="#i-user"/></svg><span data-i18n="tab_profile">Профіль</span></button>
     </nav>
 
     <div class="sheet" id="sheet">
@@ -461,6 +560,22 @@ const tg = window.Telegram && window.Telegram.WebApp;
 const tgAtLeast = v => !!(tg && tg.isVersionAtLeast && tg.isVersionAtLeast(v));
 const inTelegram = !!(tg && tg.initData);
 const E = window.GGEngine;
+
+/* ================= Language ================= */
+const I18N = window.GGI18N;
+const LANG = I18N.detect(tg && tg.initDataUnsafe && tg.initDataUnsafe.user);
+function tr(key, vars) {
+    let s = (I18N.dict[LANG] && I18N.dict[LANG][key]) || I18N.dict.en[key] || key;
+    if (vars) for (const k in vars) s = s.split("{" + k + "}").join(vars[k]);
+    return s;
+}
+function applyI18n() {
+    document.documentElement.lang = LANG;
+    document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = tr(el.dataset.i18n); });
+    document.getElementById("refNote").textContent = tr("ref_note", { g: 3, s: 50 });
+    document.getElementById("userName").textContent = tr("player");
+}
+applyI18n();
 
 function applyViewport() {
     const h = (tg && tg.viewportStableHeight) || window.innerHeight;
@@ -676,17 +791,19 @@ function draw() {
         ctx.fillRect(h.x * U + e[0], h.y * U + e[1], 3, 3);
     }
 
-    if (state === "idle") panel(["SNAKE", "натисни OK"]);
-    if (state === "paused") panel(["ПАУЗА", "натисни OK"]);
+    if (countText) { panel([countText, "GGSNAKE"]); return; }
+    if (state === "idle") panel(["SNAKE", tr("cv_press")]);
+    if (state === "paused") panel([tr("cv_pause"), tr("cv_press")]);
     if (state === "over" || state === "win") {
-        const title = state === "win" ? "ПЕРЕМОГА!" : "GAME OVER";
+        const title = state === "win" ? tr("cv_win") : tr("cv_over");
         let third = "";
         if (lastResult) third = lastResult;
-        else if (submitting) third = "зберігаємо...";
-        panel([title, "рахунок " + game.score, third]);
+        else if (submitting) third = tr("cv_saving");
+        panel([title, tr("cv_score", { n: game.score }), third]);
     }
 }
 let lastResult = "";
+let countText = null;
 
 /* ---------- HUD ---------- */
 function updateHud() {
@@ -694,12 +811,12 @@ function updateHud() {
     $("score").textContent = pad(score, 4);
     $("best").textContent = "HI " + pad(Math.max(bestShown(), state === "running" ? score : 0), 4);
     $("level").textContent = "LV" + (game ? game.level() : 1);
-    $("modeLabel").textContent = settings.mode === "wrap" ? "ТРЕНУВАННЯ" : (online() ? "РЕЙТИНГ" : "ОФЛАЙН");
-    const hints = { idle: "OK — старт", running: "грай!", paused: "OK — далі", over: "OK — ще раз", win: "OK — ще раз" };
+    $("modeLabel").textContent = settings.mode === "wrap" ? tr("mode_training") : (online() ? tr("mode_ranked") : tr("mode_offline"));
+    const hints = { idle: tr("hint_idle"), running: tr("hint_running"), paused: tr("hint_paused"), over: tr("hint_over"), win: tr("hint_over") };
     $("hint").textContent = hints[state];
     const running = state === "running";
     $("playIcon").setAttribute("href", running ? "#i-pause" : "#i-play");
-    $("playLabel").textContent = running ? "ПАУЗА" : (state === "paused" ? "ДАЛІ" : "СТАРТ");
+    $("playLabel").textContent = running ? tr("ctl_pause") : (state === "paused" ? tr("ctl_resume") : tr("ctl_start"));
 }
 
 /* ---------- Flow ---------- */
@@ -733,7 +850,7 @@ async function play() {
                 ranked = true;
             } else {
                 ranked = false;
-                toast("Немає зв'язку з сервером — гра не йде в рейтинг", "bad");
+                toast(tr("toast_offline"), "bad");
             }
         } else ranked = false;
     }
@@ -776,19 +893,19 @@ async function finish(result) {
         try {
             const r = await api("/api/session/finish", { method: "POST", body: { sessionId: sid, turns: turns.join(",") }, timeout: 15000 });
             me = r.me;
-            if (r.contestOver) lastResult = "конкурс завершено";
+            if (r.contestOver) lastResult = tr("cv_contest_over");
             else if (r.newBest) {
-                lastResult = "РЕКОРД! місце #" + (me.scoreRank || "?");
-                toast("Новий рекорд — " + r.score + "! Ти #" + (me.scoreRank || "?") + " у рейтингу", "good");
+                lastResult = tr("cv_record", { n: me.scoreRank || "?" });
+                toast(tr("toast_record", { s: r.score, r: me.scoreRank || "?" }), "good");
                 haptic("success");
                 $("topDot").style.display = "";
-            } else lastResult = me.scoreRank ? "твоє місце #" + me.scoreRank : "";
+            } else lastResult = me.scoreRank ? tr("cv_place", { n: me.scoreRank }) : "";
             renderAll();
         } catch (e) {
-            lastResult = "не зараховано";
-            const msg = { too_fast: "Гра не пройшла перевірку часу", invalid_run: "Гра не пройшла перевірку",
-                          daily_limit: "Ліміт ігор на сьогодні", banned: "Акаунт заблоковано" }[e.code];
-            toast(msg || "Не вдалося зберегти результат", "bad");
+            lastResult = tr("cv_rejected");
+            const msg = { too_fast: tr("err_too_fast"), invalid_run: tr("err_invalid"),
+                          daily_limit: tr("err_daily"), banned: tr("err_banned") }[e.code];
+            toast(msg || tr("err_save"), "bad");
         } finally {
             submitting = false;
             updateHud(); draw();
@@ -844,6 +961,10 @@ press($("btnMid"), () => { haptic("medium"); toggle(); });
 press($("btnReset"), () => { if (!submitting) resetGame(); });
 
 document.addEventListener("keydown", e => {
+    if (!splash.done) {
+        if (e.code === "Space" || e.key === "Enter") { e.preventDefault(); splashPlay(); }
+        return;
+    }
     if (currentTab !== "game" || $("sheet").classList.contains("open")) return;
     const map = { ArrowUp: "U", ArrowDown: "D", ArrowLeft: "L", ArrowRight: "R", w: "U", s: "D", a: "L", d: "R" };
     const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
@@ -901,25 +1022,25 @@ function money(v) { return "$" + v; }
 function renderBoard() {
     const data = boardCache[board];
     const list = $("boardList");
-    $("boardHint").textContent = board === "ref" ? "Друзі, які реально зіграли" : "Найкращий результат за конкурс";
+    $("boardHint").textContent = board === "ref" ? tr("hint_ref") : tr("hint_score");
     if (!API_BASE) {
-        list.innerHTML = '<div class="empty">Рейтинг гравців з\'явиться після запуску сервера.</div>';
+        list.innerHTML = '<div class="empty">' + tr("board_soon") + '</div>';
         $("boardCount").textContent = ""; return;
     }
     if (!data) { list.innerHTML = '<div class="skeleton"></div>'.repeat(5); return; }
-    if (data.error) { list.innerHTML = '<div class="empty">Не вдалося завантажити рейтинг.<br>Спробуй пізніше.</div>'; return; }
+    if (data.error) { list.innerHTML = '<div class="empty">' + tr("board_error") + '</div>'; return; }
 
     const prizes = (contest || data.contest || {})[board === "ref" ? "prizesRef" : "prizesScore"] || [];
-    $("boardCount").textContent = data.total ? data.total + " у рейтингу" : "";
+    $("boardCount").textContent = data.total ? tr("in_board", { n: data.total }) : "";
     if (!data.rows.length) {
-        list.innerHTML = '<div class="empty">' + (board === "ref" ? "Поки ніхто не запросив друзів.<br>Стань першим!" : "Ще немає результатів.<br>Зіграй першим!") + "</div>";
+        list.innerHTML = '<div class="empty">' + (board === "ref" ? tr("board_empty_ref") : tr("board_empty_score")) + "</div>";
         return;
     }
     const row = r => {
         const prize = prizes[r.rank - 1];
         return `<div class="row${r.me ? " me" : ""}">
             <div class="rank${r.rank <= 3 ? " r" + r.rank : ""}">${r.rank}</div>
-            <div class="who"><b>${escapeHtml(r.name)}${r.me ? " (ти)" : ""}</b>${prize ? `<span>${money(prize)}</span>` : ""}</div>
+            <div class="who"><b>${escapeHtml(r.name)}${r.me ? " (" + tr("you") + ")" : ""}</b>${prize ? `<span>${money(prize)}</span>` : ""}</div>
             <div class="pts">${r.value}</div></div>`;
     };
     let html = data.rows.map(row).join("");
@@ -963,9 +1084,9 @@ function renderContest() {
     const sum = a => a.reduce((x, y) => x + y, 0);
     $("cScoreSum").textContent = money(sum(contest.prizesScore));
     $("cRefSum").textContent = money(sum(contest.prizesRef));
-    $("cScorePlaces").textContent = "топ-" + contest.prizesScore.length + " · 1 місце " + money(contest.prizesScore[0] || 0);
-    $("cRefPlaces").textContent = "топ-" + contest.prizesRef.length + " · 1 місце " + money(contest.prizesRef[0] || 0);
-    $("refNote").textContent = `Друг зараховується, коли зіграє ${contest.refMinGames} гри і набере ${contest.refMinScore}+ очок у рейтинговому режимі.`;
+    $("cScorePlaces").textContent = tr("places", { n: contest.prizesScore.length, p: money(contest.prizesScore[0] || 0) });
+    $("cRefPlaces").textContent = tr("places", { n: contest.prizesRef.length, p: money(contest.prizesRef[0] || 0) });
+    $("refNote").textContent = tr("ref_note", { g: contest.refMinGames, s: contest.refMinScore });
     tickCountdown();
 }
 
@@ -974,12 +1095,12 @@ function tickCountdown() {
     const left = Date.parse(contest.endsAt) - Date.now();
     if (left <= 0) {
         $("countdown").style.display = "none"; $("cEnded").style.display = "";
-        $("chipTime").textContent = "фініш"; return;
+        $("chipTime").textContent = tr("finish"); return;
     }
     const d = Math.floor(left / 86400000), h = Math.floor(left / 3600000) % 24,
           m = Math.floor(left / 60000) % 60, s = Math.floor(left / 1000) % 60;
     $("cdD").textContent = d; $("cdH").textContent = pad(h, 2); $("cdM").textContent = pad(m, 2); $("cdS").textContent = pad(s, 2);
-    $("chipTime").textContent = d > 0 ? `${d}д ${pad(h, 2)}г` : `${pad(h, 2)}:${pad(m, 2)}:${pad(s, 2)}`;
+    $("chipTime").textContent = d > 0 ? `${d}d ${pad(h, 2)}:${pad(m, 2)}` : `${pad(h, 2)}:${pad(m, 2)}:${pad(s, 2)}`;
 }
 setInterval(tickCountdown, 1000);
 
@@ -990,12 +1111,12 @@ function renderInvite() {
     $("invActive").textContent = me ? me.refActive : 0;
     $("invTotal").textContent = me ? me.refTotal : 0;
     $("invRank").textContent = me && me.refRank ? "#" + me.refRank : "—";
-    $("refLink").textContent = me ? me.refLink.replace("https://", "") : (inTelegram ? "Завантаження..." : "Відкрий гру в Telegram");
+    $("refLink").textContent = me ? me.refLink.replace("https://", "") : (inTelegram ? tr("loading_dots") : tr("open_in_tg"));
 }
 
 $("btnInvite").addEventListener("click", () => {
-    const pool = contest && contest.pool ? ` Розіграш ${money(contest.pool)}!` : "";
-    const text = `Граю в GGSNAKE — класична змійка в Telegram.${pool} Заходь 🐍`;
+    const pool = contest && contest.pool ? tr("share_pool", { p: money(contest.pool) }) : "";
+    const text = tr("share_text", { pool });
     const url = "https://t.me/share/url?url=" + encodeURIComponent(refLink()) + "&text=" + encodeURIComponent(text);
     haptic("medium");
     if (tg && tg.openTelegramLink) tg.openTelegramLink(url); else window.open(url, "_blank");
@@ -1011,7 +1132,7 @@ $("btnCopy").addEventListener("click", async () => {
         ta.remove();
     }
     haptic(ok ? "success" : "error");
-    toast(ok ? "Посилання скопійовано" : "Не вдалося скопіювати", ok ? "good" : "bad");
+    toast(ok ? tr("copied") : tr("copy_fail"), ok ? "good" : "bad");
 });
 
 /* ================= Profile ================= */
@@ -1019,7 +1140,7 @@ function renderProfile() {
     const u = tg && tg.initDataUnsafe && tg.initDataUnsafe.user;
     if (u) {
         const name = [u.first_name, u.last_name].filter(Boolean).join(" ");
-        $("userName").textContent = name || "Гравець";
+        $("userName").textContent = name || tr("player");
         $("userHandle").textContent = u.username ? "@" + u.username : "Telegram";
         const av = $("avatar");
         if (u.photo_url && !av.querySelector("img")) {
@@ -1030,8 +1151,8 @@ function renderProfile() {
         } else if (!u.photo_url) av.textContent = (name || "G")[0].toUpperCase();
     }
     const ob = $("offlineBanner");
-    if (!inTelegram) { ob.style.display = ""; $("offlineText").textContent = "Відкрий гру в Telegram, щоб твої результати потрапили в рейтинг."; }
-    else if (!API_BASE) { ob.style.display = ""; $("offlineText").textContent = "Рейтинг запрацює після запуску сервера. Зараз результати зберігаються тільки на цьому пристрої."; }
+    if (!inTelegram) { ob.style.display = ""; $("offlineText").textContent = tr("offline_tg"); }
+    else if (!API_BASE) { ob.style.display = ""; $("offlineText").textContent = tr("offline_server"); }
     else ob.style.display = "none";
 
     $("stBest").textContent = bestShown();
@@ -1073,59 +1194,26 @@ $("tglHaptic").addEventListener("click", () => { settings.haptic = !settings.hap
 /* ================= Rules / privacy ================= */
 function fmtDate(iso) {
     try {
-        return new Date(iso).toLocaleString("uk-UA", { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+        return new Date(iso).toLocaleString(LANG, { day: "numeric", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
     } catch (e) { return iso; }
 }
 
-function rulesHtml() {
+function legalArgs() {
     const c = contest || { pool: 1000, currency: "USDT", prizesScore: [300, 150, 75, 40, 35], prizesRef: [200, 100, 50, 25, 25], refMinGames: 3, refMinScore: 50, endsAt: null };
-    const list = a => a.map((p, i) => `<li>${i + 1} місце — ${money(p)}</li>`).join("");
-    return `
-<h4>1. Організатор</h4>
-<p>Розіграш проводить команда GGSNAKE (бот @ggsnake_game_bot). Зв'язок: ${escapeHtml(ORGANIZER_CONTACT)}.
-Telegram не є організатором, спонсором чи партнером цього розіграшу.</p>
-<h4>2. Строки</h4>
-<p>Розіграш триває до ${c.endsAt ? fmtDate(c.endsAt) : "дати, оголошеної в боті"} (час вашого пристрою). Результати після цього моменту не враховуються.</p>
-<h4>3. Хто може брати участь</h4>
-<ul><li>Повнолітні користувачі Telegram.</li><li>Один гравець — один акаунт. Мультиакаунти дискваліфікуються.</li></ul>
-<h4>4. Призовий фонд — ${money(c.pool)} ${escapeHtml(c.currency)}</h4>
-<p><b>Рекорди</b> — найвищий результат у рейтинговому режимі:</p><ul>${list(c.prizesScore)}</ul>
-<p><b>Друзі</b> — найбільше зарахованих друзів:</p><ul>${list(c.prizesRef)}</ul>
-<p>Друг зараховується, якщо він новий гравець, перейшов за вашим посиланням, зіграв щонайменше ${c.refMinGames} рейтингові гри і набрав ${c.refMinScore}+ очок.
-При однаковому результаті вище той, хто досяг його раніше.</p>
-<h4>5. Чесна гра</h4>
-<ul>
-<li>Кожна рейтингова гра перевіряється на сервері: сервер повністю перепроходить її і сам рахує очки.</li>
-<li>Заборонено: боти, скрипти, автоклікери, зміна коду гри, накрутка фейкових друзів.</li>
-<li>Перед виплатою організатор переглядає записи ігор і запрошених друзів переможців і може дискваліфікувати за порушення.</li>
-</ul>
-<h4>6. Виплата</h4>
-<p>Переможців оголосимо в боті протягом 3 днів після завершення. Переможець має відповісти протягом 72 годин і надати адресу гаманця USDT або TON (наприклад, Telegram Wallet).
-Виплата — протягом 7 днів після підтвердження. Якщо переможець не відповів, приз переходить до наступного місця.</p>
-<h4>7. Інше</h4>
-<ul>
-<li>Податки та обов'язки за законами своєї країни переможець сплачує самостійно.</li>
-<li>Участь безкоштовна, покупки не потрібні.</li>
-<li>Організатор може змінити правила, повідомивши про це в боті.</li>
-</ul>`;
+    return {
+        contact: escapeHtml(ORGANIZER_CONTACT),
+        ends: c.endsAt ? escapeHtml(fmtDate(c.endsAt)) : "—",
+        pool: money(c.pool) + " " + escapeHtml(c.currency || "USDT"),
+        prizesScore: c.prizesScore, prizesRef: c.prizesRef,
+        g: c.refMinGames, s: c.refMinScore,
+        list: a => a.map((p, i) => `<li>#${i + 1} — ${money(p)}</li>`).join("")
+    };
 }
-
-function privacyHtml() {
-    return `
-<h4>Що ми зберігаємо</h4>
-<ul><li>Telegram ID, ім'я, username, мову.</li><li>Результати ігор, записи рекордних ігор (для перевірки чесності), хто кого запросив.</li></ul>
-<h4>Що бачать інші</h4>
-<p>У рейтингу показується тільки ваше ім'я з Telegram і результат. ID та username не показуються.</p>
-<h4>Навіщо</h4>
-<p>Тільки для роботи гри, рейтингу, захисту від накруток і виплати призів. Ми не продаємо і не передаємо дані третім особам.</p>
-<h4>Видалення</h4>
-<p>Напишіть ${escapeHtml(ORGANIZER_CONTACT)} — ми видалимо ваші дані.</p>
-<h4>На пристрої</h4>
-<p>Налаштування і локальна статистика зберігаються тільки на вашому пристрої.</p>`;
-}
+const rulesHtml = () => I18N.rulesHtml(LANG, legalArgs());
+const privacyHtml = () => I18N.privacyHtml(LANG, legalArgs());
 
 function openSheet(kind) {
-    $("sheetTitle").textContent = kind === "privacy" ? "Конфіденційність" : "Правила розіграшу";
+    $("sheetTitle").textContent = kind === "privacy" ? tr("privacy") : tr("rules_full");
     $("sheetBody").innerHTML = kind === "privacy" ? privacyHtml() : rulesHtml();
     $("sheetBody").scrollTop = 0;
     $("sheet").classList.add("open");
@@ -1139,6 +1227,138 @@ function closeSheet() {
 document.querySelectorAll("[data-open]").forEach(b => b.addEventListener("click", () => openSheet(b.dataset.open)));
 $("sheetClose").addEventListener("click", closeSheet);
 
+/* ================= Splash ================= */
+const splash = {
+    el: $("splash"), bg: $("spBg"), lcd: $("spLcd"),
+    t: 0, timer: null, ring: null, done: false,
+    path: (() => {
+        const p = [];
+        for (let r = 0; r < 12; r++) {
+            if (r % 2 === 0) for (let c = 1; c <= 15; c++) p.push([c, r]);
+            else for (let c = 15; c >= 1; c--) p.push([c, r]);
+        }
+        for (let r = 11; r >= 0; r--) p.push([0, r]);
+        return p;
+    })()
+};
+
+function splashLayout() {
+    const el = splash.el;
+    const W = el.clientWidth, H = el.clientHeight;
+    const dpr = Math.max(1, Math.min(2, window.devicePixelRatio || 1));
+    splash.bg.width = Math.round(W * dpr); splash.bg.height = Math.round(H * dpr);
+    splash.dpr = dpr;
+    const cell = 24, cols = Math.max(6, Math.floor(W / cell)), rows = Math.max(10, Math.floor(H / cell));
+    const ox = (W - cols * cell) / 2, oy = (H - rows * cell) / 2;
+    const ring = [];
+    for (let c = 0; c < cols; c++) ring.push([c, 0]);
+    for (let r = 1; r < rows; r++) ring.push([cols - 1, r]);
+    for (let c = cols - 2; c >= 0; c--) ring.push([c, rows - 1]);
+    for (let r = rows - 2; r > 0; r--) ring.push([0, r]);
+    splash.ring = { cells: ring, cell, ox, oy };
+    // fit the phone into the free space between slogan and button
+    const stage = $("spStage").clientHeight;
+    const k = Math.max(0.62, Math.min(1.24, stage / 470));
+    $("spPhone").style.transform = `scale(${k})`;
+    // keep the logo on one line whatever font is available
+    const tt = $("spTitle");
+    tt.style.fontSize = "";
+    const maxW = W - 24;
+    if (tt.offsetWidth > maxW) tt.style.fontSize = (parseFloat(getComputedStyle(tt).fontSize) * maxW / tt.offsetWidth) + "px";
+    const s1 = tr("splash_s1"), s2 = tr("splash_s2");
+    $("spSlogan").classList.toggle("small", Math.max(s1.length, s2.length) > 18 || W < 350);
+    $("spNote").classList.toggle("small", tr("splash_note").length > 36);
+    splashDraw();
+}
+
+function splashDraw() {
+    const t = splash.t;
+    // big background snake around the screen edges
+    const g = splash.bg.getContext("2d"), R = splash.ring;
+    if (R) {
+        g.setTransform(splash.dpr, 0, 0, splash.dpr, 0, 0);
+        g.clearRect(0, 0, splash.bg.width, splash.bg.height);
+        const m = R.cells.length, len = 16;
+        g.shadowColor = "#c6ff3d"; g.shadowBlur = 16;
+        for (let i = len - 1; i >= 0; i--) {
+            const c = R.cells[((t - i) % m + m) % m];
+            g.globalAlpha = Math.max(0.1, 0.9 - i * 0.05);
+            g.fillStyle = "#c6ff3d";
+            g.beginPath();
+            g.roundRect ? g.roundRect(R.ox + c[0] * R.cell + 1, R.oy + c[1] * R.cell + 1, R.cell - 2, R.cell - 2, 5)
+                        : g.rect(R.ox + c[0] * R.cell + 1, R.oy + c[1] * R.cell + 1, R.cell - 2, R.cell - 2);
+            g.fill();
+        }
+        const f = R.cells[(Math.floor(t / 40) * 40 + 40) % m];
+        g.globalAlpha = (t % 6) < 3 ? 1 : 0.35;
+        g.shadowColor = "#ff2fb3"; g.fillStyle = "#ff2fb3";
+        g.beginPath(); g.arc(R.ox + f[0] * R.cell + R.cell / 2, R.oy + f[1] * R.cell + R.cell / 2, R.cell / 2 - 1, 0, Math.PI * 2); g.fill();
+        g.globalAlpha = 1; g.shadowBlur = 0;
+    }
+    // tiny LCD game on the phone
+    const l = splash.lcd.getContext("2d");
+    l.setTransform(2, 0, 0, 2, 0, 0);
+    l.clearRect(0, 0, 172, 148);
+    l.fillStyle = "#1f2a0c";
+    l.font = "9px Silkscreen, monospace"; l.textBaseline = "top";
+    const P = splash.path, n = P.length, eaten = Math.floor(t / 14), len = 6 + (eaten % 10);
+    l.textAlign = "left"; l.fillText(String(eaten * 10).padStart(4, "0"), 6, 4);
+    l.textAlign = "center"; l.fillText("SNAKE", 86, 4);
+    l.textAlign = "right"; l.fillText("HI 1240", 166, 4);
+    l.strokeStyle = "#1f2a0c"; l.lineWidth = 1.5; l.strokeRect(6, 18, 160, 124);
+    for (let i = 0; i < len; i++) {
+        const c = P[((t - i) % n + n) % n];
+        l.fillRect(6 + c[0] * 10, 18 + c[1] * 10, 9, 9);
+    }
+    if ((t % 6) < 4) {
+        const f = P[((eaten + 1) * 14) % n], fx = 6 + f[0] * 10, fy = 18 + f[1] * 10;
+        l.fillRect(fx + 3, fy, 3, 3); l.fillRect(fx, fy + 3, 3, 3); l.fillRect(fx + 6, fy + 3, 3, 3); l.fillRect(fx + 3, fy + 6, 3, 3);
+    }
+}
+
+function splashStart() {
+    try { tg && tg.setHeaderColor("#040705"); tg && tg.setBackgroundColor("#040705"); } catch (e) {}
+    splashLayout();
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (!reduce) splash.timer = setInterval(() => { splash.t++; splashDraw(); }, 140);
+    window.addEventListener("resize", () => { if (!splash.done) splashLayout(); });
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!splash.done) splashLayout(); });
+}
+
+async function splashPlay() {
+    if (splash.done || splash.el.classList.contains("loading")) return;
+    haptic("medium");
+    splash.el.classList.add("loading");
+    const minWait = new Promise(r => setTimeout(r, 1200));
+    const ready = Promise.race([bootReady, new Promise(r => setTimeout(r, 3500))]);
+    await Promise.all([minWait, ready]);
+    splash.done = true;
+    clearInterval(splash.timer);
+    try { tg && tg.setHeaderColor("#0a0e13"); tg && tg.setBackgroundColor("#0a0e13"); } catch (e) {}
+    splash.el.classList.add("hide");
+    haptic("success");
+    setTimeout(() => { splash.el.remove(); }, 450);
+    layout();
+    startCountdown();
+}
+$("spPlay").addEventListener("click", splashPlay);
+
+function startCountdown() {
+    if (state !== "idle") return;
+    const seq = ["3", "2", "1"];
+    let i = 0;
+    const step = () => {
+        if (i < seq.length) {
+            countText = seq[i++]; draw(); haptic("light");
+            setTimeout(step, 550);
+        } else {
+            countText = null;
+            if (state === "idle") play(); else draw();
+        }
+    };
+    step();
+}
+
 /* ================= Boot ================= */
 function renderAll() { updateHud(); renderContest(); renderInvite(); renderProfile(); renderBoard(); draw(); }
 
@@ -1148,11 +1368,12 @@ renderAll();
 layout();
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => draw());
 
-(async () => {
+const bootReady = (async () => {
     await loadMe();
     if (isRankedMode()) resetGame(true);
     if (API_BASE) loadBoard();
 })();
+splashStart();
 </script>
 </body>
 </html>
