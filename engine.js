@@ -52,7 +52,7 @@
     }
 
     // Difficulty curve: faster every level, more apples to clear, longer start
-    function intervalFor(level) { return Math.max(48, Math.round(150 * Math.pow(0.955, level - 1))); }
+    function intervalFor(level) { return Math.max(45, Math.round(150 * Math.pow(0.94, level - 1))); }
     function applesFor(level) { return Math.min(25, 8 + level); }
     function startLength(level) { return Math.min(7, 3 + Math.floor((level - 1) / 2)); }
     function applePoints(level) { return 5 + level * 5; }
