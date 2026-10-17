@@ -34,7 +34,7 @@ MAX_GAMES_PER_DAY = "500"
 # Bot look: welcome picture, official channel (without @), support contact
 WELCOME_IMAGE = "https://bliawrk0029.github.io/GGSNAKE/brand/post.png"
 CHANNEL_USERNAME = ""
-SUPPORT_CONTACT = ""
+SUPPORT_CONTACT = "@ggsnakeadm"
 INITDATA_MAX_AGE = "86400"
 
 # Secrets — set in the Cloudflare dashboard (Settings → Variables and Secrets), never in this file:
