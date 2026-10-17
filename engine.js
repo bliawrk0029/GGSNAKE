@@ -12,17 +12,17 @@
 (function (root) {
     "use strict";
 
-    var VERSION = 2;
+    var VERSION = 3;
     var COLS = 20;
     var ROWS = 24;
-    var APPLES_PER_LEVEL = 10;
+    var NAMED_LEVELS = 30;        // after level 30 the game goes on at max speed with new mazes
     var BONUS_EVERY = 4;          // a bonus appears after every 4th apple of a level
     var BONUS_TTL = 30;           // ticks the bonus stays on the field
     var COMBO_WINDOW = 15;        // ticks between apples to count as a combo
     var DIRS = { U: [0, -1], D: [0, 1], L: [-1, 0], R: [1, 0] };
     var OPP = { U: "D", D: "U", L: "R", R: "L" };
 
-    // Mazes as wall rectangles [x, y, w, h]. Row 12 near the start is always free.
+    // Hand-made mazes as wall rectangles [x, y, w, h]. Rows 11-13 near the start are always free.
     var MAZES = [
         [],
         [[3, 5, 14, 1], [3, 18, 14, 1]],
@@ -30,7 +30,14 @@
          [2, 21, 5, 1], [2, 17, 1, 5], [13, 21, 5, 1], [17, 17, 1, 5]],
         [[6, 2, 1, 7], [13, 2, 1, 7], [6, 15, 1, 7], [13, 15, 1, 7]],
         [[5, 4, 10, 1], [5, 19, 10, 1], [5, 4, 1, 5], [14, 4, 1, 5], [5, 15, 1, 5], [14, 15, 1, 5]],
-        [[0, 6, 8, 1], [12, 6, 8, 1], [0, 17, 8, 1], [12, 17, 8, 1], [9, 0, 2, 4], [9, 20, 2, 4]]
+        [[0, 6, 8, 1], [12, 6, 8, 1], [0, 17, 8, 1], [12, 17, 8, 1], [9, 0, 2, 4], [9, 20, 2, 4]],
+        [[3, 0, 1, 8], [7, 0, 1, 8], [11, 0, 1, 8], [15, 0, 1, 8], [5, 16, 1, 8], [9, 16, 1, 8], [13, 16, 1, 8], [17, 16, 1, 8]],
+        [[3, 3, 14, 1], [3, 20, 14, 1], [3, 3, 1, 7], [16, 3, 1, 7], [3, 14, 1, 7], [16, 14, 1, 7], [8, 7, 4, 1], [8, 16, 4, 1]],
+        [[2, 4, 10, 1], [8, 8, 10, 1], [2, 16, 10, 1], [8, 19, 10, 1], [16, 12, 1, 5]],
+        [[3, 3, 2, 2], [8, 3, 2, 2], [13, 3, 2, 2], [17, 7, 2, 2], [3, 7, 2, 2], [8, 7, 2, 2], [13, 7, 2, 2],
+         [3, 16, 2, 2], [8, 16, 2, 2], [13, 16, 2, 2], [17, 16, 2, 2], [3, 20, 2, 2], [8, 20, 2, 2], [13, 20, 2, 2], [17, 20, 2, 2], [15, 11, 2, 3]],
+        [[1, 1, 18, 1], [18, 1, 1, 9], [4, 4, 12, 1], [4, 4, 1, 5], [1, 22, 18, 1], [1, 14, 1, 9], [4, 19, 12, 1], [15, 15, 1, 5]],
+        [[9, 0, 2, 9], [9, 15, 2, 9], [14, 10, 6, 1], [14, 14, 6, 1], [3, 5, 4, 1], [3, 18, 4, 1]]
     ];
 
     function rng(seed) {
@@ -44,19 +51,63 @@
         };
     }
 
-    function intervalFor(level) { return Math.max(60, 150 - (level - 1) * 12); }
+    // Difficulty curve: faster every level, more apples to clear, longer start
+    function intervalFor(level) { return Math.max(48, Math.round(150 * Math.pow(0.955, level - 1))); }
+    function applesFor(level) { return Math.min(25, 8 + level); }
+    function startLength(level) { return Math.min(7, 3 + Math.floor((level - 1) / 2)); }
     function applePoints(level) { return 5 + level * 5; }
 
+    function inStartLane(x, y) { return y >= 10 && y <= 14 && x <= 12; }
+
+    // Levels 1-12 are hand-made. From level 13 a hand-made maze is mirrored and
+    // extra blocks are added (the same for every player), checked for reachability.
     function mazeCells(level, cols, rows) {
-        var rects = MAZES[(level - 1) % MAZES.length];
-        var cells = [];
-        for (var i = 0; i < rects.length; i++) {
-            var r = rects[i];
+        var base = level <= MAZES.length ? MAZES[level - 1] : MAZES[1 + (level - MAZES.length - 1) % (MAZES.length - 1)];
+        var flipX = level > MAZES.length && (level % 2 === 0);
+        var flipY = level > MAZES.length && (level % 3 === 0);
+        var set = {}, cells = [];
+        function add(x, y) {
+            if (x < 0 || y < 0 || x >= cols || y >= rows) return;
+            if (flipX) x = cols - 1 - x;
+            if (flipY) y = rows - 1 - y;
+            if (inStartLane(x, y) || set[x + "," + y]) return;
+            set[x + "," + y] = 1; cells.push({ x: x, y: y });
+        }
+        for (var i = 0; i < base.length; i++) {
+            var r = base[i];
             for (var x = r[0]; x < r[0] + r[2]; x++)
-                for (var y = r[1]; y < r[1] + r[3]; y++)
-                    if (x >= 0 && y >= 0 && x < cols && y < rows) cells.push({ x: x, y: y });
+                for (var y = r[1]; y < r[1] + r[3]; y++) add(x, y);
+        }
+        if (level > MAZES.length) {
+            var rand = rng(level * 7919 + 13);
+            var extra = Math.min(24, (level - MAZES.length) * 2);
+            for (var k = 0; k < extra; k++) {
+                var bx = Math.floor(rand() * cols), by = Math.floor(rand() * rows);
+                var before = cells.length;
+                add(bx, by);
+                if (cells.length > before && !connected(set, cols, rows)) {
+                    var c = cells.pop(); delete set[c.x + "," + c.y];
+                }
+            }
         }
         return cells;
+    }
+
+    // Every free cell must be reachable from the start
+    function connected(set, cols, rows) {
+        var start = "6," + Math.floor(rows / 2), seen = {}, q = [start], n = 0, free = 0;
+        for (var y = 0; y < rows; y++) for (var x = 0; x < cols; x++) if (!set[x + "," + y]) free++;
+        seen[start] = 1;
+        while (q.length) {
+            var c = q.pop().split(","), cx = +c[0], cy = +c[1]; n++;
+            var nb = [[cx + 1, cy], [cx - 1, cy], [cx, cy + 1], [cx, cy - 1]];
+            for (var i = 0; i < 4; i++) {
+                var k = nb[i][0] + "," + nb[i][1];
+                if (nb[i][0] < 0 || nb[i][1] < 0 || nb[i][0] >= cols || nb[i][1] >= rows || set[k] || seen[k]) continue;
+                seen[k] = 1; q.push(k);
+            }
+        }
+        return n === free;
     }
 
     function create(opts) {
@@ -77,8 +128,9 @@
         function key(x, y) { return x + "," + y; }
 
         function startLevel() {
-            var y = Math.floor(rows / 2);
-            g.snake = [{ x: 6, y: y }, { x: 5, y: y }, { x: 4, y: y }];
+            var y = Math.floor(rows / 2), L = startLength(g.stage);
+            g.snake = [];
+            for (var s = 0; s < L; s++) g.snake.push({ x: 6 - s, y: y });
             g.dir = "R";
             g.walls = mazeCells(g.stage, cols, rows);
             wallSet = {};
@@ -157,7 +209,7 @@
                 g.eaten++; g.levelEaten++;
                 ev.ate = true;
 
-                if (g.levelEaten >= APPLES_PER_LEVEL) {
+                if (g.levelEaten >= applesFor(g.stage)) {
                     var bonusLv = 50 * g.stage;
                     g.score += bonusLv; ev.points += bonusLv;
                     g.stage++;
@@ -179,7 +231,7 @@
 
         g.level = function () { return g.stage; };
         g.interval = function () { return intervalFor(g.stage); };
-        g.applesLeft = function () { return APPLES_PER_LEVEL - g.levelEaten; };
+        g.applesLeft = function () { return applesFor(g.stage) - g.levelEaten; };
 
         startLevel();
         return g;
@@ -224,8 +276,8 @@
     }
 
     root.GGEngine = {
-        VERSION: VERSION, COLS: COLS, ROWS: ROWS, APPLES_PER_LEVEL: APPLES_PER_LEVEL,
-        MAZES: MAZES.length,
-        create: create, replay: replay, intervalFor: intervalFor
+        VERSION: VERSION, COLS: COLS, ROWS: ROWS, NAMED_LEVELS: NAMED_LEVELS,
+        MAZES: MAZES.length, mazeCells: mazeCells, connected: connected,
+        create: create, replay: replay, intervalFor: intervalFor, applesFor: applesFor
     };
 })(typeof globalThis !== "undefined" ? globalThis : this);
