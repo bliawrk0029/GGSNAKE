@@ -509,6 +509,37 @@ function appLink(env, startParam) {
     return startParam ? `${base}?startapp=${encodeURIComponent(startParam)}` : base;
 }
 
+const BOT_TEXT = {
+    uk: {
+        start: (c) => "🐍 <b>GGSNAKE</b> — та сама класична змійка з кнопкового телефона, тепер у Telegram.\n\n" +
+            "• 30 рівнів із лабіринтами, бонус-жучки, 8-бітні звуки\n• Чесний рейтинг: кожну гру перевіряє сервер\n" +
+            (c.pool ? `\n🏆 <b>Сезон 1 — $${c.pool} ${c.currency}</b>\nРекорди: ${c.prizesScore.join(" · ")}\nДрузі: ${c.prizesRef.join(" · ")}\n` : "") +
+            "\nТисни «Грати» 👇",
+        play: "🎮 Грати", channel: "📢 Канал", rules: "📜 Правила",
+        rulesText: "📜 Повні правила розіграшу, політика конфіденційності та «Чесна гра і безпека» — у грі: Профіль → ⚙ → Правила.\n\n🔒 Ми ніколи не просимо оплату за приз, паролі, коди чи seed-фрази. Офіційний бот — лише @{bot}.",
+        help: "Потрібна допомога? Напишіть {contact}.\n\nКоманди:\n/start — грати\n/rules — правила розіграшу\n/help — допомога"
+    },
+    ru: {
+        start: (c) => "🐍 <b>GGSNAKE</b> — та самая классическая змейка с кнопочного телефона, теперь в Telegram.\n\n" +
+            "• 30 уровней с лабиринтами, бонус-жуки, 8-битные звуки\n• Честный рейтинг: каждую игру проверяет сервер\n" +
+            (c.pool ? `\n🏆 <b>Сезон 1 — $${c.pool} ${c.currency}</b>\nРекорды: ${c.prizesScore.join(" · ")}\nДрузья: ${c.prizesRef.join(" · ")}\n` : "") +
+            "\nЖми «Играть» 👇",
+        play: "🎮 Играть", channel: "📢 Канал", rules: "📜 Правила",
+        rulesText: "📜 Полные правила розыгрыша, политика конфиденциальности и «Честная игра и безопасность» — в игре: Профиль → ⚙ → Правила.\n\n🔒 Мы никогда не просим оплату за приз, пароли, коды или seed-фразы. Официальный бот — только @{bot}.",
+        help: "Нужна помощь? Напишите {contact}.\n\nКоманды:\n/start — играть\n/rules — правила розыгрыша\n/help — помощь"
+    },
+    en: {
+        start: (c) => "🐍 <b>GGSNAKE</b> — the classic snake from your old button phone, now in Telegram.\n\n" +
+            "• 30 levels with mazes, bonus bugs, 8-bit sounds\n• Fair leaderboard: the server verifies every game\n" +
+            (c.pool ? `\n🏆 <b>Season 1 — $${c.pool} ${c.currency}</b>\nHigh scores: ${c.prizesScore.join(" · ")}\nFriends: ${c.prizesRef.join(" · ")}\n` : "") +
+            "\nTap “Play” 👇",
+        play: "🎮 Play", channel: "📢 Channel", rules: "📜 Rules",
+        rulesText: "📜 Full giveaway rules, privacy policy and “Fair play & security” are in the game: Profile → ⚙ → Rules.\n\n🔒 We never ask for payment to receive a prize, passwords, codes or seed phrases. The only official bot is @{bot}.",
+        help: "Need help? Message {contact}.\n\nCommands:\n/start — play\n/rules — giveaway rules\n/help — help"
+    }
+};
+const botLang = code => { code = String(code || "").slice(0, 2); return code === "uk" || code === "ru" ? code : code === "be" ? "ru" : "en"; };
+
 async function botWebhook(req, env) {
     const secret = req.headers.get("X-Telegram-Bot-Api-Secret-Token") || "";
     if (!env.WEBHOOK_SECRET || !safeEqual(secret, env.WEBHOOK_SECRET)) return new Response("forbidden", { status: 403 });
@@ -518,25 +549,29 @@ async function botWebhook(req, env) {
     const msg = update && update.message;
     if (!msg || !msg.chat || typeof msg.text !== "string") return new Response("ok");
 
+    const T = BOT_TEXT[botLang(msg.from && msg.from.language_code)];
     const text = msg.text.trim();
     const c = contestInfo(env);
+    const sub = s => s.split("{bot}").join(env.BOT_USERNAME || "").split("{contact}").join(env.SUPPORT_CONTACT || "@" + (env.BOT_USERNAME || ""));
+    const links = start => {
+        const row = [{ text: T.play, url: appLink(env, start) }];
+        const kb = [row];
+        if (env.CHANNEL_USERNAME) kb.push([{ text: T.channel, url: `https://t.me/${env.CHANNEL_USERNAME}` }]);
+        return { inline_keyboard: kb };
+    };
     if (text.startsWith("/start")) {
         const payload = text.split(/\s+/)[1] || "";
         const start = /^ref_\d{1,15}$/.test(payload) ? payload : "";
-        await tgCall(env, "sendMessage", {
-            chat_id: msg.chat.id,
-            text:
-                "🐍 GGSNAKE — класична змійка прямо в Telegram.\n\n" +
-                (c.pool ? `🏆 Розіграш ${c.pool} ${c.currency}: найкращі рекорди та найактивніші запрошувачі.\n\n` : "") +
-                "Тисни «Грати» 👇",
-            reply_markup: { inline_keyboard: [[{ text: "🎮 Грати", url: appLink(env, start) }]] }
-        });
+        const caption = T.start(c);
+        if (env.WELCOME_IMAGE) {
+            await tgCall(env, "sendPhoto", { chat_id: msg.chat.id, photo: env.WELCOME_IMAGE, caption, parse_mode: "HTML", reply_markup: links(start) });
+        } else {
+            await tgCall(env, "sendMessage", { chat_id: msg.chat.id, text: caption, parse_mode: "HTML", reply_markup: links(start) });
+        }
     } else if (text.startsWith("/rules")) {
-        await tgCall(env, "sendMessage", {
-            chat_id: msg.chat.id,
-            text: "Правила розіграшу — у грі: вкладка «Рейтинг» → «Правила».",
-            reply_markup: { inline_keyboard: [[{ text: "📜 Відкрити", url: appLink(env, "") }]] }
-        });
+        await tgCall(env, "sendMessage", { chat_id: msg.chat.id, text: sub(T.rulesText), reply_markup: links("") });
+    } else if (text.startsWith("/help")) {
+        await tgCall(env, "sendMessage", { chat_id: msg.chat.id, text: sub(T.help) });
     }
     return new Response("ok");
 }
@@ -571,8 +606,25 @@ async function admin(req, env, url) {
             }),
             commands: await tgCall(env, "setMyCommands", {
                 commands: [
+                    { command: "start", description: "Play GGSNAKE" },
+                    { command: "rules", description: "Giveaway rules" },
+                    { command: "help", description: "Help & support" }
+                ]
+            }),
+            commandsUk: await tgCall(env, "setMyCommands", {
+                language_code: "uk",
+                commands: [
                     { command: "start", description: "Грати в GGSNAKE" },
-                    { command: "rules", description: "Правила розіграшу" }
+                    { command: "rules", description: "Правила розіграшу" },
+                    { command: "help", description: "Допомога і підтримка" }
+                ]
+            }),
+            commandsRu: await tgCall(env, "setMyCommands", {
+                language_code: "ru",
+                commands: [
+                    { command: "start", description: "Играть в GGSNAKE" },
+                    { command: "rules", description: "Правила розыгрыша" },
+                    { command: "help", description: "Помощь и поддержка" }
                 ]
             })
         };

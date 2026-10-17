@@ -31,6 +31,10 @@ REF_HOLD_HOURS = "24"
 REF_DAILY_CAP = "15"
 REF_OWNER_MIN_GAMES = "5"
 MAX_GAMES_PER_DAY = "500"
+# Bot look: welcome picture, official channel (without @), support contact
+WELCOME_IMAGE = "https://bliawrk0029.github.io/GGSNAKE/brand/post.png"
+CHANNEL_USERNAME = ""
+SUPPORT_CONTACT = ""
 INITDATA_MAX_AGE = "86400"
 
 # Secrets — set in the Cloudflare dashboard (Settings → Variables and Secrets), never in this file:
