@@ -735,6 +735,7 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-in
                 </div>
             </div>
             <div class="links">
+                <button class="btn block" id="btnChannel"><span data-i18n="channel_btn">Канал GGSNAKE</span></button>
                 <button class="btn ghost block" data-open="rules" data-i18n="rules_full">Правила розіграшу</button>
                 <button class="btn ghost block" data-open="fair" data-i18n="fair_title">Чесна гра і безпека</button>
                 <button class="btn ghost block" data-open="privacy" data-i18n="privacy_title">Політика конфіденційності</button>
@@ -766,6 +767,7 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-in
 const API_BASE = "";
 const BOT_LINK = "https://t.me/ggsnake_game_bot/play";
 const ORGANIZER_CONTACT = "@ggsnakeadm";
+const CHANNEL_LINK = "https://t.me/ggsnakeofficial";
 
 /* ================= Telegram ================= */
 const tg = window.Telegram && window.Telegram.WebApp;
@@ -1645,6 +1647,7 @@ function renderFriends() {
 
 $("btnFriends").addEventListener("click", () => { openPanel("frSheet"); renderFriends(); loadFriends(); });
 $("btnSettings").addEventListener("click", () => openPanel("setSheet"));
+$("btnChannel").addEventListener("click", () => { haptic("light"); if (tg && tg.openTelegramLink) tg.openTelegramLink(CHANNEL_LINK); else window.open(CHANNEL_LINK, "_blank"); });
 
 $("btnInvite").addEventListener("click", () => {
     const pool = contest && contest.pool ? tr("share_pool", { p: money(contest.pool) }) : "";

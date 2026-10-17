@@ -540,6 +540,8 @@
     };
     for (var lg2 in TABS2) for (var k2 in TABS2[lg2]) D[lg2][k2] = TABS2[lg2][k2];
     D.uk.ends_tba = "дати, оголошеної в боті"; D.en.ends_tba = "the date announced in the bot"; D.ru.ends_tba = "даты, объявленной в боте";
+    var CH = {"uk": "📢 Канал GGSNAKE", "en": "📢 GGSNAKE channel", "ru": "📢 Канал GGSNAKE", "es": "📢 Canal GGSNAKE", "pt": "📢 Canal GGSNAKE", "de": "📢 GGSNAKE-Kanal", "pl": "📢 Kanał GGSNAKE", "tr": "📢 GGSNAKE kanalı"};
+    for (var lc in CH) D[lc].channel_btn = CH[lc];
     var FAIR = {"uk": "Чесна гра і безпека", "en": "Fair play & security", "ru": "Честная игра и безопасность", "es": "Juego limpio y seguridad", "pt": "Jogo limpo e segurança", "de": "Fair Play & Sicherheit", "pl": "Uczciwa gra i bezpieczeństwo", "tr": "Adil oyun ve güvenlik"};
     for (var lf in FAIR) D[lf].fair_title = FAIR[lf];
     D.uk.privacy = "Конфіденційність"; D.uk.privacy_title = "Політика конфіденційності"; D.en.privacy_title = "Privacy policy"; D.ru.privacy_title = "Политика конфиденциальности";
