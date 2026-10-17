@@ -317,6 +317,62 @@ main { flex: 1; min-height: 0; position: relative; }
 @keyframes spSweep { 0% { left: -40%; } 45%,100% { left: 130%; } }
 @media (max-height: 640px) { .sp-grill { display: none; } .sp-slogan { font-size: 16px; } .sp-wrap { gap: 10px; } }
 @media (prefers-reduced-motion: reduce) { .splash *, .splash *::before, .splash *::after { animation: none !important; transition: none !important; } }
+/* ---------- Phone shell look (v4): the whole app is the face of an old phone, modern UI on top ---------- */
+:root { --accent: #c3e67f; --accent-ink: #172208; --accent-dim: rgba(195, 230, 127, .14); --line: #2c3746; --surface: rgba(30, 38, 50, .78); --surface-2: #273140; }
+body {
+    background:
+        radial-gradient(130% 55% at 50% 0%, #3a4659 0%, #243040 42%, #161c26 78%, #10141b 100%) fixed;
+}
+body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: .55;
+    background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1.2px), radial-gradient(rgba(0,0,0,.23) 1px, transparent 1.2px);
+    background-size: 4px 4px, 6px 6px; background-position: 0 0, 2px 3px; }
+body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: linear-gradient(90deg, rgba(255,255,255,.08) 0, rgba(255,255,255,0) 26px, rgba(0,0,0,0) calc(100% - 34px), rgba(0,0,0,.35) 100%);
+    box-shadow: inset 0 0 0 7px transparent; }
+.app { z-index: 1; }
+.app::before { content: ""; position: absolute; inset: 6px 6px calc(6px + env(safe-area-inset-bottom)); border-radius: 36px; pointer-events: none;
+    border: 1px solid rgba(255,255,255,.07); box-shadow: inset 0 0 0 1px rgba(0,0,0,.3); }
+.top { position: relative; padding-top: 22px; }
+.top::before { content: ""; position: absolute; left: 50%; top: 8px; width: 84px; height: 8px; margin-left: -42px; border-radius: 4px;
+    background: #0a0d12 radial-gradient(#3a4555 1px, transparent 1.3px) 0 0 / 5px 5px; box-shadow: inset 0 2px 3px #000, 0 1px 0 rgba(255,255,255,.12); }
+.logo { font-family: Silkscreen, monospace; font-weight: 400; font-size: 15px; letter-spacing: 4px; color: #8a96a7; text-shadow: 0 -1px 0 rgba(0,0,0,.6), 0 1px 0 rgba(255,255,255,.1); }
+.logo span { color: #8a96a7; }
+.device {
+    padding: 11px; border-radius: 22px 22px 30px 30px; border: 0;
+    background: linear-gradient(180deg, #0b0e13, #161b23);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.08), inset 0 3px 10px #000, 0 1px 0 rgba(255,255,255,.15), 0 -1px 0 rgba(0,0,0,.6);
+    position: relative;
+}
+.device::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+    background: linear-gradient(160deg, rgba(255,255,255,.14) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 70%, rgba(255,255,255,.05) 100%); }
+.lcd { border-radius: 8px 8px 12px 12px;
+    box-shadow: inset 0 0 0 2px #0c100a, inset 0 6px 14px rgba(0,0,0,.35), 0 0 26px rgba(169,207,94,.18); }
+.lcd::before { content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 2;
+    background-image: linear-gradient(rgba(28,42,14,.06) 1px, transparent 1px), linear-gradient(90deg, rgba(28,42,14,.06) 1px, transparent 1px); background-size: 4px 4px; }
+.controls { padding-top: 16px; }
+.round {
+    width: 64px; height: 44px; border-radius: 22px 22px 28px 28px; border: 0; color: #c5ced8;
+    background: linear-gradient(180deg, #4a5568, #2a313d);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 5px 0 #0a0d12, 0 9px 16px rgba(0,0,0,.4);
+}
+.round svg { width: 20px; height: 20px; }
+.round.primary { color: #172208; background: linear-gradient(180deg, #d3ec9f, #b9d983 55%, #9cbf62);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 5px 0 #5d7a2c, 0 9px 16px rgba(0,0,0,.4); }
+.round.pressed { box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 1px 0 #0a0d12; transform: translateY(4px); }
+.round.primary.pressed { box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 1px 0 #5d7a2c; }
+.side small { font-family: Silkscreen, monospace; font-weight: 400; font-size: 9px; letter-spacing: 1.5px; color: #8a96a7; }
+.dpad { border: 0; background: radial-gradient(circle at 50% 35%, #46526a, #222a36 70%);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.14), 0 6px 0 #0a0d12, 0 12px 22px rgba(0,0,0,.45); }
+.dp { background: none; border: 0; box-shadow: none; color: #b9d983; border-radius: 50%; }
+.dp svg { width: 40%; height: 40%; }
+.dp.pressed { color: #eaf7cf; background: rgba(185,217,131,.12); box-shadow: none; transform: none; }
+.dp.mid { background: linear-gradient(180deg, #1c232e, #2c3543); color: #8a96a7; font-family: Silkscreen, monospace; font-weight: 400; font-size: 10px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.65), 0 1px 0 rgba(255,255,255,.1); }
+.card { background: linear-gradient(180deg, rgba(40,49,63,.72), rgba(24,30,40,.78)); border-color: rgba(255,255,255,.06);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.06), 0 8px 20px rgba(0,0,0,.25); }
+.tabbar { background: linear-gradient(180deg, rgba(22,28,38,.92), rgba(14,18,25,.96)); border-top: 1px solid rgba(255,255,255,.06); box-shadow: 0 -1px 0 rgba(0,0,0,.5); }
+.tabbar button.on { color: #c3e67f; }
+.tabbar button.on::after { content: ""; position: absolute; bottom: 1px; left: 50%; width: 18px; height: 3px; margin-left: -9px; border-radius: 2px; background: #c3e67f; box-shadow: 0 0 8px rgba(195,230,127,.5); }
 </style>
 </head>
 <body>
@@ -569,7 +625,7 @@ const $ = id => document.getElementById(id);
 
 /* ================= Local storage ================= */
 const THEMES = {
-    green: { lcd: "#b9c9a0", ink: "#1f2a16" },
+    green: { lcd: "#aacd62", ink: "#1c2a0e" },
     amber: { lcd: "#24180a", ink: "#ffb43a" },
     ice:   { lcd: "#a8d4e0", ink: "#0d2a38" },
     neon:  { lcd: "#0c120e", ink: "#b8f34a" }
@@ -1401,7 +1457,7 @@ function drawSnake(t, dt) {
         lp(hx + ux * 10 - uy, hy + uy * 10 + ux); lp(hx + ux * 11 - uy * 2, hy + uy * 11 + ux * 2);
         lp(hx + ux * 10 + uy, hy + uy * 10 - ux); lp(hx + ux * 11 + uy * 2, hy + uy * 11 - ux * 2);
     }
-    // apple ahead on the path; eaten when the head reaches it
+    // classic food dot (pixel diamond) ahead on the path; eaten when the head reaches it
     if (splash.u >= splash.apple) {
         const [ax, ay] = snakePoint(splash.apple);
         splash.bursts.push({ x: ax, y: ay, t });
@@ -1411,7 +1467,7 @@ function drawSnake(t, dt) {
         setTimeout(() => splash.box.classList.remove("lit"), 220);
     }
     const [ax, ay] = snakePoint(splash.apple);
-    if ((t % 0.5) < 0.38) { ldisc(ax, ay, 2.2, true); lp(ax + 1, ay - 3); lp(ax + 2, ay - 4); }
+    if ((t % 0.5) < 0.38) { for (let dy = -2; dy <= 2; dy++) { const w = 2 - Math.abs(dy); lp(ax - w, ay + dy); if (w) lp(ax + w, ay + dy); } }
     splash.bursts = splash.bursts.filter(b => t - b.t < 0.45);
     for (const b of splash.bursts) {
         const d = (t - b.t) * 26;
