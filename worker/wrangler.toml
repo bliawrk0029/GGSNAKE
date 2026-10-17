@@ -22,8 +22,14 @@ PRIZE_POOL = "1000"
 PRIZE_CURRENCY = "USDT"
 PRIZES_SCORE = "300,150,75,40,35"
 PRIZES_REF = "200,100,50,25,25"
-REF_MIN_GAMES = "3"
-REF_MIN_SCORE = "50"
+# Friend points: counted after 5 ranked games on 2 different days (+1),
+# loyal when they play on day 7 (+1), friend of a friend counted (+0.5).
+REF_MIN_GAMES = "5"
+REF_MIN_DAYS = "2"
+REF_LOYAL_DAY = "7"
+REF_HOLD_HOURS = "24"
+REF_DAILY_CAP = "15"
+REF_OWNER_MIN_GAMES = "5"
 MAX_GAMES_PER_DAY = "500"
 INITDATA_MAX_AGE = "86400"
 

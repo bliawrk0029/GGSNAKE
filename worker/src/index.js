@@ -79,6 +79,18 @@ function randomSeed() {
 const now = () => Date.now();
 const contestEnd = env => Date.parse(env.CONTEST_END || "2100-01-01T00:00:00Z");
 const contestOver = env => now() > contestEnd(env);
+const DAY = 86400000;
+const dayNo = t => Math.floor(t / DAY);
+const weekNo = t => Math.floor((dayNo(t) + 3) / 7);          // 1970-01-01 was a Thursday → weeks start Monday
+const weekStart = t => (weekNo(t) * 7 - 3) * DAY;
+const holdMs = env => Number(env.REF_HOLD_HOURS ?? 24) * 3600000;
+const refCfg = env => ({
+    minGames: Number(env.REF_MIN_GAMES || 5),
+    minDays: Number(env.REF_MIN_DAYS || 2),
+    loyalDay: Number(env.REF_LOYAL_DAY || 7),
+    dailyCap: Number(env.REF_DAILY_CAP || 15),
+    ownerMinGames: Number(env.REF_OWNER_MIN_GAMES || 5)
+});
 const intList = s => String(s || "").split(",").map(x => Number(x.trim())).filter(x => x > 0);
 
 function displayName(u) {
@@ -182,11 +194,30 @@ async function scoreRank(env, u) {
     return r.c + 1;
 }
 
-async function refRank(env, u) {
-    if (!u.ref_active) return null;
+// Friend points board: sum of held-over, non-revoked events of non-banned, active owners
+function refBoardSql(env, extra = "") {
+    return `SELECT e.beneficiary AS id, u.first_name, SUM(e.pts2) AS p2, MAX(e.at) AS last
+        FROM ref_events e JOIN users u ON u.id = e.beneficiary
+        WHERE e.status = 0 AND e.at <= ? AND e.at >= ? AND u.banned = 0 AND u.games >= ${refCfg(env).ownerMinGames} ${extra}
+        GROUP BY e.beneficiary`;
+}
+
+async function refPoints(env, id, from) {
     const r = await env.DB.prepare(
-        "SELECT COUNT(*) AS c FROM users WHERE banned = 0 AND (ref_active > ? OR (ref_active = ? AND ref_active_at < ?))"
-    ).bind(u.ref_active, u.ref_active, u.ref_active_at || 0).first();
+        "SELECT COALESCE(SUM(pts2), 0) AS p2, MAX(at) AS last FROM ref_events WHERE beneficiary = ? AND status = 0 AND at <= ? AND at >= ?"
+    ).bind(id, now() - holdMs(env), from || 0).first();
+    const pend = await env.DB.prepare(
+        "SELECT COALESCE(SUM(pts2), 0) AS p2 FROM ref_events WHERE beneficiary = ? AND ((status = 0 AND at > ?) OR status = 1)"
+    ).bind(id, now() - holdMs(env)).first();
+    return { p2: r.p2, last: r.last || 0, pending2: pend.p2 };
+}
+
+async function refRank(env, u, from) {
+    const mine = await refPoints(env, u.id, from);
+    if (!mine.p2 || u.banned || u.games < refCfg(env).ownerMinGames) return null;
+    const r = await env.DB.prepare(
+        `SELECT COUNT(*) AS c FROM (${refBoardSql(env)}) b WHERE b.p2 > ? OR (b.p2 = ? AND b.last < ?)`
+    ).bind(now() - holdMs(env), from || 0, mine.p2, mine.p2, mine.last).first();
     return r.c + 1;
 }
 
@@ -198,8 +229,7 @@ function contestInfo(env) {
         currency: env.PRIZE_CURRENCY || "USDT",
         prizesScore: intList(env.PRIZES_SCORE),
         prizesRef: intList(env.PRIZES_REF),
-        refMinGames: Number(env.REF_MIN_GAMES || 3),
-        refMinScore: Number(env.REF_MIN_SCORE || 50)
+        ref: Object.assign(refCfg(env), { holdHours: Number(env.REF_HOLD_HOURS ?? 24) })
     };
 }
 
@@ -208,7 +238,10 @@ function refLink(env, id) {
 }
 
 async function profile(env, u) {
+    const pts = await refPoints(env, u.id, 0);
     return {
+        refPoints: pts.p2 / 2,
+        refPending: pts.pending2 / 2,
         name: displayName(u),
         best: u.best,
         games: u.games,
@@ -292,9 +325,11 @@ async function apiFinish(req, env) {
 
     const over = contestOver(env);
     const newBest = !over && r.score > u.best;
+    const today = dayNo(t);
+    const newDay = u.last_play_day !== today;
     const stmts = [
-        db.prepare("UPDATE users SET games = games + 1, total_score = total_score + ?, last_seen = ? WHERE id = ?")
-            .bind(r.score, t, user.id)
+        db.prepare("UPDATE users SET games = games + 1, total_score = total_score + ?, last_seen = ?, days_played = days_played + ?, last_play_day = ? WHERE id = ?")
+            .bind(r.score, t, newDay ? 1 : 0, today, user.id)
     ];
     if (newBest) {
         stmts.push(db.prepare("UPDATE users SET best = ?, best_at = ? WHERE id = ?").bind(r.score, t, user.id));
@@ -302,20 +337,18 @@ async function apiFinish(req, env) {
             "INSERT INTO runs (user_id, session_id, seed, score, ticks, duration_ms, turns, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
         ).bind(user.id, sid, s.seed, r.score, r.ticks, duration, turns, t));
     }
-    await db.batch(stmts);
-
-    // Referral activation: the invited friend must actually play
-    const games = u.games + 1;
-    const best = Math.max(u.best, newBest ? r.score : 0);
-    if (!over && u.referrer_id && !u.activated &&
-        games >= Number(env.REF_MIN_GAMES || 3) && best >= Number(env.REF_MIN_SCORE || 50)) {
-        const a = await db.prepare("UPDATE users SET activated = 1 WHERE id = ? AND activated = 0").bind(user.id).run();
-        if (a.meta && a.meta.changes === 1) {
-            await db.prepare(
-                "UPDATE users SET ref_active = ref_active + 1, ref_active_at = ? WHERE id = ? AND banned = 0"
-            ).bind(t, u.referrer_id).run();
+    if (!over && r.score > 0) {
+        for (const period of ["d" + today, "w" + weekNo(t)]) {
+            stmts.push(db.prepare(
+                `INSERT INTO period_best (user_id, period, best, best_at) VALUES (?, ?, ?, ?)
+                 ON CONFLICT (user_id, period) DO UPDATE SET best = excluded.best, best_at = excluded.best_at WHERE excluded.best > period_best.best`
+            ).bind(user.id, period, r.score, t));
         }
     }
+    await db.batch(stmts);
+
+    // Friend points: the invited friend must really play, and keep playing
+    if (!over && u.referrer_id) await referralProgress(env, u, t, u.games + 1, u.days_played + (newDay ? 1 : 0), today);
 
     const fresh = await db.prepare("SELECT * FROM users WHERE id = ?").bind(user.id).first();
     return {
@@ -327,35 +360,135 @@ async function apiFinish(req, env) {
     };
 }
 
+async function addRefEvent(env, beneficiary, friendId, kind, pts2, t) {
+    const db = env.DB;
+    const owner = await db.prepare("SELECT id, banned FROM users WHERE id = ?").bind(beneficiary).first();
+    if (!owner || owner.banned) return;
+    // Too many new friends in 24h → keep the points, but only after a manual check
+    let status = 0;
+    if (kind === "counted") {
+        const c = await db.prepare(
+            "SELECT COUNT(*) AS c FROM ref_events WHERE beneficiary = ? AND kind = 'counted' AND at > ?"
+        ).bind(beneficiary, t - DAY).first();
+        if (c.c >= refCfg(env).dailyCap) status = 1;
+    }
+    await db.prepare(
+        "INSERT OR IGNORE INTO ref_events (beneficiary, friend_id, kind, pts2, at, status) VALUES (?, ?, ?, ?, ?, ?)"
+    ).bind(beneficiary, friendId, kind, pts2, t, status).run();
+}
+
+async function referralProgress(env, u, t, games, days, today) {
+    const db = env.DB;
+    const cfg = refCfg(env);
+    if (!u.activated && games >= cfg.minGames && days >= cfg.minDays) {
+        const a = await db.prepare("UPDATE users SET activated = 1 WHERE id = ? AND activated = 0").bind(u.id).run();
+        if (a.meta && a.meta.changes === 1) {
+            await db.prepare("UPDATE users SET ref_active = ref_active + 1, ref_active_at = ? WHERE id = ?").bind(t, u.referrer_id).run();
+            await addRefEvent(env, u.referrer_id, u.id, "counted", 2, t);
+            // Second level: whoever invited the referrer gets half a point
+            const up = await db.prepare("SELECT referrer_id FROM users WHERE id = ?").bind(u.referrer_id).first();
+            if (up && up.referrer_id && up.referrer_id !== u.id) await addRefEvent(env, up.referrer_id, u.id, "l2", 1, t);
+        }
+        return;
+    }
+    if (u.activated && !u.loyal && today >= dayNo(u.created_at) + cfg.loyalDay - 1) {
+        const a = await db.prepare("UPDATE users SET loyal = 1 WHERE id = ? AND loyal = 0").bind(u.id).run();
+        if (a.meta && a.meta.changes === 1) await addRefEvent(env, u.referrer_id, u.id, "loyal", 2, t);
+    }
+}
+
+async function apiFriends(req, env) {
+    const { user } = await auth(req, env);
+    const db = env.DB;
+    const u = await db.prepare("SELECT * FROM users WHERE id = ?").bind(user.id).first();
+    if (!u) throw new HttpError(409, "call_me_first");
+    const cfg = refCfg(env);
+    const hold = now() - holdMs(env);
+    const { results } = await db.prepare(
+        "SELECT id, first_name, games, days_played, best, activated, loyal, created_at, banned FROM users WHERE referrer_id = ? ORDER BY activated DESC, games DESC LIMIT 100"
+    ).bind(u.id).all();
+    const ev = (await db.prepare("SELECT friend_id, kind, pts2, at, status FROM ref_events WHERE beneficiary = ?").bind(u.id).all()).results;
+    const byFriend = {};
+    for (const e of ev) (byFriend[e.friend_id] = byFriend[e.friend_id] || []).push(e);
+    const friends = results.map(f => {
+        const list = byFriend[f.id] || [];
+        const points = list.filter(e => e.status === 0 && e.at <= hold).reduce((a, e) => a + e.pts2, 0) / 2;
+        const pending = list.filter(e => e.status === 1 || (e.status === 0 && e.at > hold)).reduce((a, e) => a + e.pts2, 0) / 2;
+        const state = f.banned || list.some(e => e.status === 2) ? "revoked"
+            : list.some(e => e.status === 1) ? "review"
+            : f.loyal ? "loyal" : f.activated ? "counted" : f.games > 0 ? "playing" : "joined";
+        return {
+            name: displayName(f), state, points, pending,
+            games: Math.min(f.games, cfg.minGames), days: Math.min(f.days_played, cfg.minDays),
+            dayIndex: dayNo(now()) - dayNo(f.created_at) + 1, best: f.best
+        };
+    });
+    // Second-level points are listed as one line
+    const l2 = ev.filter(e => e.kind === "l2");
+    const pts = await refPoints(env, u.id, 0);
+    return {
+        points: pts.p2 / 2, pending: pts.pending2 / 2, rank: await refRank(env, u, 0),
+        joined: u.ref_total, counted: u.ref_active,
+        l2: { count: l2.length, points: l2.filter(e => e.status === 0 && e.at <= hold).reduce((a, e) => a + e.pts2, 0) / 2 },
+        friends, rules: cfg, link: refLink(env, u.id), contest: contestInfo(env)
+    };
+}
+
 async function apiLeaderboard(req, env, url) {
     const board = url.searchParams.get("board") === "ref" ? "ref" : "score";
+    const per = ["day", "week"].includes(url.searchParams.get("period")) ? url.searchParams.get("period") : "season";
     let meId = null;
     if (req.headers.get("X-Init-Data")) {
         try { meId = (await auth(req, env)).user.id; } catch { meId = null; }
     }
+    const db = env.DB;
+    const t = now();
+    let rows, me = null, total;
 
-    const sql = board === "ref"
-        ? "SELECT id, first_name, ref_active AS value FROM users WHERE banned = 0 AND ref_active > 0 ORDER BY ref_active DESC, ref_active_at ASC LIMIT 100"
-        : "SELECT id, first_name, best AS value FROM users WHERE banned = 0 AND best > 0 ORDER BY best DESC, best_at ASC LIMIT 100";
-    const { results } = await env.DB.prepare(sql).all();
-
-    const rows = results.map((u, i) => ({ rank: i + 1, name: displayName(u), value: u.value, me: u.id === meId }));
-
-    let me = null;
-    if (meId && !rows.some(r => r.me)) {
-        const u = await env.DB.prepare("SELECT * FROM users WHERE id = ?").bind(meId).first();
-        if (u) {
-            const rank = board === "ref" ? await refRank(env, u) : await scoreRank(env, u);
-            me = { rank, name: displayName(u), value: board === "ref" ? u.ref_active : u.best, me: true };
+    if (board === "ref") {
+        const from = per === "day" ? dayNo(t) * DAY : per === "week" ? weekStart(t) : 0;
+        const { results } = await db.prepare(`${refBoardSql(env)} ORDER BY p2 DESC, last ASC LIMIT 100`).bind(t - holdMs(env), from).all();
+        rows = results.map((u, i) => ({ rank: i + 1, name: displayName(u), value: u.p2 / 2, me: u.id === meId }));
+        total = (await db.prepare(`SELECT COUNT(*) AS c FROM (${refBoardSql(env)})`).bind(t - holdMs(env), from).first()).c;
+        if (meId && !rows.some(r => r.me)) {
+            const u = await db.prepare("SELECT * FROM users WHERE id = ?").bind(meId).first();
+            if (u) {
+                const p = await refPoints(env, u.id, from);
+                me = { rank: await refRank(env, u, from), name: displayName(u), value: p.p2 / 2, me: true };
+            }
+        }
+    } else if (per === "season") {
+        const { results } = await db.prepare(
+            "SELECT id, first_name, best AS value FROM users WHERE banned = 0 AND best > 0 ORDER BY best DESC, best_at ASC LIMIT 100"
+        ).all();
+        rows = results.map((u, i) => ({ rank: i + 1, name: displayName(u), value: u.value, me: u.id === meId }));
+        total = (await db.prepare("SELECT COUNT(*) AS c FROM users WHERE banned = 0 AND best > 0").first()).c;
+        if (meId && !rows.some(r => r.me)) {
+            const u = await db.prepare("SELECT * FROM users WHERE id = ?").bind(meId).first();
+            if (u) me = { rank: await scoreRank(env, u), name: displayName(u), value: u.best, me: true };
+        }
+    } else {
+        const period = per === "day" ? "d" + dayNo(t) : "w" + weekNo(t);
+        const { results } = await db.prepare(
+            "SELECT p.user_id AS id, u.first_name, p.best AS value FROM period_best p JOIN users u ON u.id = p.user_id WHERE p.period = ? AND u.banned = 0 ORDER BY p.best DESC, p.best_at ASC LIMIT 100"
+        ).bind(period).all();
+        rows = results.map((u, i) => ({ rank: i + 1, name: displayName(u), value: u.value, me: u.id === meId }));
+        total = (await db.prepare("SELECT COUNT(*) AS c FROM period_best p JOIN users u ON u.id = p.user_id WHERE p.period = ? AND u.banned = 0").bind(period).first()).c;
+        if (meId && !rows.some(r => r.me)) {
+            const mine = await db.prepare("SELECT best, best_at FROM period_best WHERE user_id = ? AND period = ?").bind(meId, period).first();
+            const u = await db.prepare("SELECT first_name FROM users WHERE id = ?").bind(meId).first();
+            if (u) {
+                let rank = null;
+                if (mine) rank = (await db.prepare(
+                    "SELECT COUNT(*) AS c FROM period_best p JOIN users u ON u.id = p.user_id WHERE p.period = ? AND u.banned = 0 AND (p.best > ? OR (p.best = ? AND p.best_at < ?))"
+                ).bind(period, mine.best, mine.best, mine.best_at).first()).c + 1;
+                me = { rank, name: displayName(u), value: mine ? mine.best : 0, me: true };
+            }
         }
     }
-    const total = await env.DB.prepare(
-        board === "ref" ? "SELECT COUNT(*) AS c FROM users WHERE banned = 0 AND ref_active > 0"
-                        : "SELECT COUNT(*) AS c FROM users WHERE banned = 0 AND best > 0"
-    ).first();
-    const players = await env.DB.prepare("SELECT COUNT(*) AS c FROM users").first();
-
-    return { board, rows, me, total: total.c, players: players.c, contest: contestInfo(env) };
+    const players = await db.prepare("SELECT COUNT(*) AS c FROM users").first();
+    const resetsAt = per === "day" ? (dayNo(t) + 1) * DAY : per === "week" ? weekStart(t) + 7 * DAY : null;
+    return { board, period: per, rows, me, total, players: players.c, resetsAt, contest: contestInfo(env) };
 }
 
 /* ------------------------------------------------------------------ */
@@ -450,14 +583,26 @@ async function admin(req, env, url) {
         const score = await db.prepare(
             "SELECT id, first_name, username, best, best_at, games FROM users WHERE banned = 0 AND best > 0 ORDER BY best DESC, best_at ASC LIMIT ?"
         ).bind(Math.max(10, c.prizesScore.length)).all();
-        const ref = await db.prepare(
-            "SELECT id, first_name, username, ref_active, ref_total, ref_active_at FROM users WHERE banned = 0 AND ref_active > 0 ORDER BY ref_active DESC, ref_active_at ASC LIMIT ?"
-        ).bind(Math.max(10, c.prizesRef.length)).all();
+        const ref = await db.prepare(`${refBoardSql(env)} ORDER BY p2 DESC, last ASC LIMIT ?`)
+            .bind(now() - holdMs(env), 0, Math.max(10, c.prizesRef.length)).all();
+        ref.results.forEach(r => { r.points = r.p2 / 2; delete r.p2; });
+        const review = await db.prepare(
+            "SELECT e.id, e.beneficiary, e.friend_id, e.kind, e.at, u.first_name, u.games, u.best FROM ref_events e JOIN users u ON u.id = e.friend_id WHERE e.status = 1 ORDER BY e.at LIMIT 200"
+        ).all();
         return {
             contest: c,
             score: score.results.map((u, i) => Object.assign(u, { place: i + 1, prize: c.prizesScore[i] || 0 })),
-            ref: ref.results.map((u, i) => Object.assign(u, { place: i + 1, prize: c.prizesRef[i] || 0 }))
+            ref: ref.results.map((u, i) => Object.assign(u, { place: i + 1, prize: c.prizesRef[i] || 0 })),
+            review: review.results
         };
+    }
+
+    if (path === "/admin/review" && req.method === "POST") {
+        // approve=1 counts the held event, approve=0 revokes it
+        const id = Number(url.searchParams.get("event"));
+        const ok = url.searchParams.get("approve") === "1";
+        await db.prepare("UPDATE ref_events SET status = ? WHERE id = ? AND status = 1").bind(ok ? 0 : 2, id).run();
+        return { ok: true, id, approved: ok };
     }
 
     if (path === "/admin/user") {
@@ -490,6 +635,9 @@ async function admin(req, env, url) {
             stmts.push(db.prepare("UPDATE users SET ref_active = MAX(0, ref_active + ?) WHERE id = ?")
                 .bind(banned ? -1 : 1, u.referrer_id));
         }
+        // ...and all points earned through them are revoked (or restored on unban)
+        stmts.push(db.prepare("UPDATE ref_events SET status = ? WHERE friend_id = ? AND status = ?")
+            .bind(banned ? 2 : 0, id, banned ? 0 : 2));
         await db.batch(stmts);
         return { ok: true, id, banned };
     }
@@ -497,7 +645,9 @@ async function admin(req, env, url) {
     if (path === "/admin/reset-season" && req.method === "POST") {
         if (url.searchParams.get("confirm") !== "yes") throw new HttpError(400, "add confirm=yes");
         await db.batch([
-            db.prepare("UPDATE users SET best = 0, best_at = NULL, ref_active = 0, ref_active_at = NULL, ref_total = 0, activated = 0, referrer_id = NULL, games = 0, total_score = 0"),
+            db.prepare("UPDATE users SET best = 0, best_at = NULL, ref_active = 0, ref_active_at = NULL, ref_total = 0, activated = 0, loyal = 0, days_played = 0, last_play_day = 0, referrer_id = NULL, games = 0, total_score = 0"),
+            db.prepare("DELETE FROM ref_events"),
+            db.prepare("DELETE FROM period_best"),
             db.prepare("DELETE FROM runs"),
             db.prepare("DELETE FROM sessions")
         ]);
@@ -555,6 +705,7 @@ export default {
                 case "POST /api/session/start": data = await apiStart(req, env); break;
                 case "POST /api/session/finish": data = await apiFinish(req, env); break;
                 case "GET /api/leaderboard": data = await apiLeaderboard(req, env, url); break;
+                case "POST /api/friends": data = await apiFriends(req, env); break;
                 default: throw new HttpError(404, "not_found");
             }
             return json(data, 200, ch);

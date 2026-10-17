@@ -26,9 +26,9 @@ const BOT_TOKEN = "123456:TEST_TOKEN_abc";
 const env = {
     DB: d1(sqlite), BOT_TOKEN, ADMIN_KEY: "admin-key-1234567890", WEBHOOK_SECRET: "hook-secret",
     ALLOWED_ORIGIN: "https://bliawrk0029.github.io", BOT_USERNAME: "ggsnake_game_bot", APP_SHORT_NAME: "play",
-    APP_URL: "https://bliawrk0029.github.io/GGSNAKE/", CONTEST_END: "2026-10-31T18:00:00Z",
+    APP_URL: "https://bliawrk0029.github.io/GGSNAKE/", CONTEST_END: "2026-11-30T18:00:00Z",
     PRIZE_POOL: "1000", PRIZES_SCORE: "300,150,75,40,35", PRIZES_REF: "200,100,50,25,25",
-    REF_MIN_GAMES: "3", REF_MIN_SCORE: "50"
+    REF_MIN_GAMES: "5", REF_MIN_DAYS: "2", REF_LOYAL_DAY: "7", REF_HOLD_HOURS: "24", REF_DAILY_CAP: "15", REF_OWNER_MIN_GAMES: "5"
 };
 
 function initData(user, startParam, token = BOT_TOKEN) {
@@ -126,21 +126,63 @@ check("cannot finish another user's session → 404", steal.status === 404);
 const big = await call("POST", "/api/session/finish", { id: 100, body: { sessionId: s.data.sessionId, turns: "1:U,".repeat(120000) } });
 check("oversized payload → 413", big.status === 413);
 
-console.log("Referral activation");
-await playRanked(200, 20); await playRanked(200, 20);
-check("not active after 2 low games", sqlite.prepare("SELECT ref_active FROM users WHERE id=100").get().ref_active === 0);
-await playRanked(200);
-check("active after 3 games with score ≥ 50", sqlite.prepare("SELECT ref_active FROM users WHERE id=100").get().ref_active === 1);
-await playRanked(200);
-check("counted only once", sqlite.prepare("SELECT ref_active FROM users WHERE id=100").get().ref_active === 1);
+console.log("Friend points");
+const pts = id => sqlite.prepare("SELECT COALESCE(SUM(pts2),0) AS p FROM ref_events WHERE beneficiary=? AND status=0").get(id).p / 2;
+for (let i = 0; i < 5; i++) await playRanked(100, 40);            // inviter is an active player
+for (let i = 0; i < 5; i++) await playRanked(200, 20);
+check("5 games on one day → not counted yet", pts(100) === 0);
+advance(86400000);
+await playRanked(200, 20);
+check("5 games on 2 days → +1 point (event)", pts(100) === 1);
+let fr = await call("POST", "/api/friends", { id: 100 });
+check("point is on hold for 24h", fr.data.points === 0 && fr.data.pending === 1 && fr.data.friends[0].state === "counted", fr.data);
+let lbr = await call("GET", "/api/leaderboard?board=ref", { id: 100 });
+check("held point not on the board yet", lbr.data.rows.length === 0);
+advance(25 * 3600000);
+fr = await call("POST", "/api/friends", { id: 100 });
+check("after 24h the point counts", fr.data.points === 1 && fr.data.rank === 1, fr.data);
+await playRanked(200, 20);
+check("counted only once", pts(100) === 1);
+
+await call("POST", "/api/me", { id: 400, start: "ref_200" });     // friend of a friend
+for (let i = 0; i < 5; i++) await playRanked(400, 20);
+advance(86400000); await playRanked(400, 20);
+check("friend's friend counted → referrer +1, grand-referrer +0.5", pts(200) === 1 && pts(100) === 1.5, [pts(200), pts(100)]);
+
+advance(4 * 86400000); await playRanked(200, 20);                // day 8 since 200 joined
+check("friend back on day 7+ → loyal +1", pts(100) === 2.5, pts(100));
+advance(25 * 3600000);
+lbr = await call("GET", "/api/leaderboard?board=ref", { id: 100 });
+check("ref board in points, me marked", lbr.data.rows[0].me && lbr.data.rows[0].value === 2.5, lbr.data.rows);
+await call("POST", "/api/me", { id: 600 });                      // inviter who never plays
+await call("POST", "/api/me", { id: 601, start: "ref_600" });
+for (let i = 0; i < 5; i++) await playRanked(601, 20);
+advance(86400000); await playRanked(601, 20); advance(25 * 3600000);
+lbr = await call("GET", "/api/leaderboard?board=ref", { id: 100 });
+check("inviter with <5 own games not on prize board", pts(600) === 1 && !lbr.data.rows.some(r => r.name === "User600"), lbr.data.rows);
+const lbw = await call("GET", "/api/leaderboard?board=ref&period=day", { id: 100 });
+check("ref board per day only counts today's held points", lbw.data.rows.length === 0, lbw.data.rows);
+
+env.REF_DAILY_CAP = "1";
+for (let i = 0; i < 5; i++) await playRanked(300, 20);
+for (const id of [501, 502]) { await call("POST", "/api/me", { id, start: "ref_300" }); for (let i = 0; i < 5; i++) await playRanked(id, 20); }
+advance(86400000); for (const id of [501, 502]) await playRanked(id, 20);
+const st = sqlite.prepare("SELECT status FROM ref_events WHERE beneficiary=300 ORDER BY id").all().map(r => r.status);
+check("over daily cap → manual review", st.join() === "0,1", st);
+fr = await call("POST", "/api/friends", { id: 300 });
+check("friend in review shown as review", fr.data.friends.some(f => f.state === "review"), fr.data.friends);
+env.REF_DAILY_CAP = "15";
 
 console.log("Leaderboards");
-const lb = await call("GET", "/api/leaderboard?board=score", { id: 300 });
-check("score board sorted", lb.data.rows.length === 2 && lb.data.rows[0].value >= lb.data.rows[1].value, lb.data.rows);
+await call("POST", "/api/me", { id: 700 });
+const lb = await call("GET", "/api/leaderboard?board=score", { id: 700 });
+check("score board sorted", lb.data.rows.length >= 2 && lb.data.rows[0].value >= lb.data.rows[1].value, lb.data.rows);
 check("no telegram ids leaked", !JSON.stringify(lb.data).includes('"id"'));
 check("me row returned when not ranked", lb.data.me && lb.data.me.me === true);
-const lbr = await call("GET", "/api/leaderboard?board=ref", { id: 100 });
-check("ref board has inviter marked as me", lbr.data.rows[0].me && lbr.data.rows[0].value === 1, lbr.data);
+const lbd = await call("GET", "/api/leaderboard?board=score&period=day", { id: 200 });
+check("day board has only today's games", lbd.status === 200 && lbd.data.period === "day" && lbd.data.resetsAt > Date.now(), lbd.data);
+const lbwk = await call("GET", "/api/leaderboard?board=score&period=week", { id: 100 });
+check("week board sorted", lbwk.data.rows.every((r, i, a) => !i || a[i - 1].value >= r.value));
 
 console.log("Bot + admin");
 const hookBad = await worker.fetch(new Request("https://api.test/tg/webhook", { method: "POST", body: "{}" }), env);
@@ -149,15 +191,15 @@ check("admin without key → 403", (await call("GET", "/admin/winners")).status 
 const w = await call("GET", "/admin/winners?key=admin-key-1234567890");
 check("winners list with prizes", w.status === 200 && w.data.score[0].prize === 300 && w.data.ref[0].prize === 200, w.data);
 const ban = await call("POST", "/admin/ban?key=admin-key-1234567890&id=200");
-check("ban removes invitee from inviter's count", ban.status === 200 && sqlite.prepare("SELECT ref_active FROM users WHERE id=100").get().ref_active === 0);
+check("ban revokes points earned through that friend", ban.status === 200 && pts(100) === 0.5, pts(100));
 const lb2 = await call("GET", "/api/leaderboard?board=score");
-check("banned user hidden from board", lb2.data.rows.length === 1);
+check("banned user hidden from board", !lb2.data.rows.some(r => r.name === "User200"));
 const runId = sqlite.prepare("SELECT id FROM runs ORDER BY score DESC LIMIT 1").get().id;
 const rv = await call("GET", "/admin/run?key=admin-key-1234567890&id=" + runId);
 check("stored run re-verifies", rv.data.verify.ok && rv.data.verify.score === rv.data.run.score);
 
 console.log("Contest over");
-clock = Date.parse("2026-11-01T00:00:00Z");
+clock = Date.parse("2026-12-01T00:00:00Z");
 const late = await playRanked(100);
 check("after end: game accepted but best frozen", late.f.status === 200 && late.f.data.contestOver === true && late.f.data.newBest === false);
 

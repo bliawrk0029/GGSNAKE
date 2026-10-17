@@ -328,6 +328,218 @@
     };
     for (var lg in EXTRA) for (var k in EXTRA[lg]) D[lg][k] = EXTRA[lg][k];
 
+    var TABS2 = {
+        uk: {
+            season_label: "СЕЗОН 1 · РОЗІГРАШ", top5: "топ-5", per_day: "Сьогодні", per_week: "Тиждень", per_season: "Сезон",
+            hint_score: "Найкраща гра за сезон · топ-5 отримують USDT", hint_score_day: "Сьогодні до 00:00 UTC · найкраща гра", hint_score_week: "Тиждень пн–нд · найкраща гра",
+            hint_ref_pts: "Друг грає = 1 бал · вірний +1 · друг друга +0.5",
+            board_local: "Рейтинг відкриється зі стартом сезону.<br>Твій рекорд на цьому пристрої — {n}.",
+            pin_no_rank: "Зіграй рейтингову гру, щоб потрапити в таблицю", pin_no_rank_ref: "Запроси друга — бали за тих, хто грає",
+            pin_season_soon: "Сезон скоро стартує", pin_in_prize: "Ти в призовій зоні — тримай місце!", pin_goal: "До призу ({n} місце) ще {d}", you_cap: "Ти",
+            lcd_soon: "СКОРО СТАРТ", lcd_d: "Д",
+            rk_0: "Черв'як", rk_1: "Вуж", rk_2: "Удав", rk_3: "Кобра", rk_4: "Анаконда",
+            rank_next: "До «{r}» ще {n} очок рекорду · звання видно в рейтингу", rank_max: "Найвище звання. Легенда!",
+            streak_days: "{n} дн.", place_season: "#{n} у сезоні", no_place: "без місця",
+            lcd_record: "РЕКОРД", lcd_last: "ОСТАННІ 12 ІГОР", lcd_games: "ІГОР", lcd_avg: "СЕР.", lcd_lv: "РІВ.", lcd_h: "Г", lcd_min: "ХВ",
+            ach_title: "Досягнення", ach_first: "Перша гра", ach_1000: "1000 очок", ach_lv10: "Рівень 10", ach_7d: "7 днів", ach_ref3: "Заклинач", ach_wrap: "Без стін",
+            tasks_title: "Завдання дня", tasks_left: "ще {t}", task_games: "Зіграй 3 гри", task_score: "Набери 300 за гру", task_share: "Поділись грою з другом",
+            friends_card: "Мої друзі · бали", friends_card_none: "Запроси друзів — бали за тих, хто грає", friends_card_rank: "#{r} серед запрошувачів",
+            fr_title: "Мої друзі", fr_points: "БАЛІВ", fr_rank: "#{n} серед запрошувачів", fr_norank: "Поки без балів",
+            fr_prize_line: "Призи топ-{n}, до {p}", fr_how: "Як рахуються бали",
+            fr_s1: "Зіграв {g} ігор за {d} різні дні", fr_s2: "Повернувся на {n}-й день", fr_s3: "Його друг теж зарахований",
+            fr_note: "Просто перехід за посиланням — 0 балів. Бали з'являються через {h} год після перевірки. Боти й фейки знімаються.",
+            fr_offline: "Список друзів з'явиться зі стартом сезону. Посилання можна надсилати вже зараз.",
+            fr_empty: "Поки нікого. Надішли посилання друзям!", fr_list: "Друзі", fr_joined: "перейшли {n}", fr_ladder: "Значки за друзів",
+            st_joined: "Перейшов", st_playing: "{g}/{m} ігор", st_counted: "Зараховано", st_loyal: "Вірний", st_review: "Перевірка", st_revoked: "Знято",
+            sub_joined: "ще не грав — нагадай", sub_playing: "ще {n} гри, днів: {d}", sub_counted: "день {n} з {m}", sub_loyal: "рекорд {b}", sub_pending: "+{p} після перевірки",
+            l2_line: "Друзі твоїх друзів: {n}", lad_1: "Перший друг", lad_3: "Заклинач", lad_5: "Зграя", lad_10: "Вожак", lad_25: "Легенда",
+            invite_btn: "Запросити друга"
+        },
+        en: {
+            season_label: "SEASON 1 · GIVEAWAY", top5: "top 5", per_day: "Today", per_week: "Week", per_season: "Season",
+            hint_score: "Best game this season · top 5 win USDT", hint_score_day: "Today until 00:00 UTC · best game", hint_score_week: "Week Mon–Sun · best game",
+            hint_ref_pts: "Friend plays = 1 pt · loyal +1 · friend of friend +0.5",
+            board_local: "The leaderboard opens when the season starts.<br>Your best on this device: {n}.",
+            pin_no_rank: "Play a ranked game to get on the board", pin_no_rank_ref: "Invite a friend — points for those who play",
+            pin_season_soon: "The season starts soon", pin_in_prize: "You're in the prizes — hold on!", pin_goal: "{d} more to a prize (place {n})", you_cap: "You",
+            lcd_soon: "STARTS SOON", lcd_d: "D",
+            rk_0: "Worm", rk_1: "Grass snake", rk_2: "Boa", rk_3: "Cobra", rk_4: "Anaconda",
+            rank_next: "{n} more best-score points to «{r}» · shown on the leaderboard", rank_max: "Top rank. Legend!",
+            streak_days: "{n} d", place_season: "#{n} this season", no_place: "no rank",
+            lcd_record: "BEST", lcd_last: "LAST 12 GAMES", lcd_games: "GAMES", lcd_avg: "AVG", lcd_lv: "LV", lcd_h: "H", lcd_min: "M",
+            ach_title: "Achievements", ach_first: "First game", ach_1000: "1000 points", ach_lv10: "Level 10", ach_7d: "7 days", ach_ref3: "Charmer", ach_wrap: "No walls",
+            tasks_title: "Daily tasks", tasks_left: "{t} left", task_games: "Play 3 games", task_score: "Score 300 in a game", task_share: "Share the game with a friend",
+            friends_card: "My friends · points", friends_card_none: "Invite friends — points for those who play", friends_card_rank: "#{r} among inviters",
+            fr_title: "My friends", fr_points: "POINTS", fr_rank: "#{n} among inviters", fr_norank: "No points yet",
+            fr_prize_line: "Prizes for top {n}, up to {p}", fr_how: "How points work",
+            fr_s1: "Played {g} games on {d} different days", fr_s2: "Came back on day {n}", fr_s3: "Their friend counted too",
+            fr_note: "Just opening the link gives 0 points. Points appear {h} h after a check. Bots and fakes are removed.",
+            fr_offline: "Your friends list appears when the season starts. You can already send your link.",
+            fr_empty: "No one yet. Send your link to friends!", fr_list: "Friends", fr_joined: "{n} joined", fr_ladder: "Badges for friends",
+            st_joined: "Joined", st_playing: "{g}/{m} games", st_counted: "Counted", st_loyal: "Loyal", st_review: "Review", st_revoked: "Removed",
+            sub_joined: "hasn't played — nudge them", sub_playing: "{n} games, {d} days to go", sub_counted: "day {n} of {m}", sub_loyal: "best {b}", sub_pending: "+{p} after check",
+            l2_line: "Friends of your friends: {n}", lad_1: "First friend", lad_3: "Charmer", lad_5: "Pack", lad_10: "Leader", lad_25: "Legend",
+            invite_btn: "Invite a friend"
+        },
+        ru: {
+            season_label: "СЕЗОН 1 · РОЗЫГРЫШ", top5: "топ-5", per_day: "Сегодня", per_week: "Неделя", per_season: "Сезон",
+            hint_score: "Лучшая игра за сезон · топ-5 получают USDT", hint_score_day: "Сегодня до 00:00 UTC · лучшая игра", hint_score_week: "Неделя пн–вс · лучшая игра",
+            hint_ref_pts: "Друг играет = 1 балл · верный +1 · друг друга +0.5",
+            board_local: "Рейтинг откроется со стартом сезона.<br>Твой рекорд на этом устройстве — {n}.",
+            pin_no_rank: "Сыграй рейтинговую игру, чтобы попасть в таблицу", pin_no_rank_ref: "Пригласи друга — баллы за тех, кто играет",
+            pin_season_soon: "Сезон скоро стартует", pin_in_prize: "Ты в призах — держи место!", pin_goal: "До приза ({n} место) ещё {d}", you_cap: "Ты",
+            lcd_soon: "СКОРО СТАРТ", lcd_d: "Д",
+            rk_0: "Червяк", rk_1: "Уж", rk_2: "Удав", rk_3: "Кобра", rk_4: "Анаконда",
+            rank_next: "До «{r}» ещё {n} очков рекорда · звание видно в рейтинге", rank_max: "Высшее звание. Легенда!",
+            streak_days: "{n} дн.", place_season: "#{n} в сезоне", no_place: "без места",
+            lcd_record: "РЕКОРД", lcd_last: "ПОСЛЕДНИЕ 12 ИГР", lcd_games: "ИГР", lcd_avg: "СР.", lcd_lv: "УР.", lcd_h: "Ч", lcd_min: "М",
+            ach_title: "Достижения", ach_first: "Первая игра", ach_1000: "1000 очков", ach_lv10: "Уровень 10", ach_7d: "7 дней", ach_ref3: "Заклинатель", ach_wrap: "Без стен",
+            tasks_title: "Задания дня", tasks_left: "ещё {t}", task_games: "Сыграй 3 игры", task_score: "Набери 300 за игру", task_share: "Поделись игрой с другом",
+            friends_card: "Мои друзья · баллы", friends_card_none: "Пригласи друзей — баллы за тех, кто играет", friends_card_rank: "#{r} среди приглашающих",
+            fr_title: "Мои друзья", fr_points: "БАЛЛОВ", fr_rank: "#{n} среди приглашающих", fr_norank: "Пока без баллов",
+            fr_prize_line: "Призы топ-{n}, до {p}", fr_how: "Как считаются баллы",
+            fr_s1: "Сыграл {g} игр за {d} разных дня", fr_s2: "Вернулся на {n}-й день", fr_s3: "Его друг тоже засчитан",
+            fr_note: "Просто переход по ссылке — 0 баллов. Баллы появляются через {h} ч после проверки. Боты и фейки снимаются.",
+            fr_offline: "Список друзей появится со стартом сезона. Ссылку можно отправлять уже сейчас.",
+            fr_empty: "Пока никого. Отправь ссылку друзьям!", fr_list: "Друзья", fr_joined: "перешли {n}", fr_ladder: "Значки за друзей",
+            st_joined: "Перешёл", st_playing: "{g}/{m} игр", st_counted: "Засчитан", st_loyal: "Верный", st_review: "Проверка", st_revoked: "Снят",
+            sub_joined: "ещё не играл — напомни", sub_playing: "ещё {n} игры, дней: {d}", sub_counted: "день {n} из {m}", sub_loyal: "рекорд {b}", sub_pending: "+{p} после проверки",
+            l2_line: "Друзья твоих друзей: {n}", lad_1: "Первый друг", lad_3: "Заклинатель", lad_5: "Стая", lad_10: "Вожак", lad_25: "Легенда",
+            invite_btn: "Пригласить друга"
+        },
+        es: {
+            season_label: "TEMPORADA 1 · SORTEO", top5: "top 5", per_day: "Hoy", per_week: "Semana", per_season: "Temporada",
+            hint_score: "Mejor partida de la temporada · el top 5 gana USDT", hint_score_day: "Hoy hasta las 00:00 UTC · mejor partida", hint_score_week: "Semana lun–dom · mejor partida",
+            hint_ref_pts: "Amigo que juega = 1 pt · fiel +1 · amigo de amigo +0.5",
+            board_local: "El ranking abre al empezar la temporada.<br>Tu récord en este dispositivo: {n}.",
+            pin_no_rank: "Juega una partida de ranking para entrar", pin_no_rank_ref: "Invita a un amigo — puntos por los que juegan",
+            pin_season_soon: "La temporada empieza pronto", pin_in_prize: "¡Estás en premios, aguanta!", pin_goal: "Faltan {d} para premio (puesto {n})", you_cap: "Tú",
+            lcd_soon: "PRONTO", lcd_d: "D",
+            rk_0: "Gusano", rk_1: "Culebra", rk_2: "Boa", rk_3: "Cobra", rk_4: "Anaconda",
+            rank_next: "Faltan {n} puntos de récord para «{r}»", rank_max: "Rango máximo. ¡Leyenda!",
+            streak_days: "{n} d", place_season: "#{n} en temporada", no_place: "sin puesto",
+            lcd_record: "RÉCORD", lcd_last: "ÚLTIMAS 12", lcd_games: "PART.", lcd_avg: "MED.", lcd_lv: "NIV.", lcd_h: "H", lcd_min: "M",
+            ach_title: "Logros", ach_first: "Primera", ach_1000: "1000 pts", ach_lv10: "Nivel 10", ach_7d: "7 días", ach_ref3: "Encantador", ach_wrap: "Sin muros",
+            tasks_title: "Tareas del día", tasks_left: "quedan {t}", task_games: "Juega 3 partidas", task_score: "Consigue 300 en una", task_share: "Comparte el juego",
+            friends_card: "Mis amigos · puntos", friends_card_none: "Invita amigos — puntos por los que juegan", friends_card_rank: "#{r} entre invitadores",
+            fr_title: "Mis amigos", fr_points: "PUNTOS", fr_rank: "#{n} entre invitadores", fr_norank: "Aún sin puntos",
+            fr_prize_line: "Premios top {n}, hasta {p}", fr_how: "Cómo se cuentan",
+            fr_s1: "Jugó {g} partidas en {d} días distintos", fr_s2: "Volvió el día {n}", fr_s3: "Su amigo también contó",
+            fr_note: "Solo abrir el enlace = 0 puntos. Los puntos aparecen {h} h después de revisarlos. Bots y falsos se eliminan.",
+            fr_offline: "La lista aparecerá al empezar la temporada. Ya puedes enviar tu enlace.",
+            fr_empty: "Aún nadie. ¡Envía tu enlace!", fr_list: "Amigos", fr_joined: "{n} entraron", fr_ladder: "Insignias por amigos",
+            st_joined: "Entró", st_playing: "{g}/{m} part.", st_counted: "Cuenta", st_loyal: "Fiel", st_review: "Revisión", st_revoked: "Quitado",
+            sub_joined: "no ha jugado — avísale", sub_playing: "faltan {n} part., días: {d}", sub_counted: "día {n} de {m}", sub_loyal: "récord {b}", sub_pending: "+{p} tras revisión",
+            l2_line: "Amigos de tus amigos: {n}", lad_1: "Primer amigo", lad_3: "Encantador", lad_5: "Manada", lad_10: "Líder", lad_25: "Leyenda",
+            invite_btn: "Invitar amigo"
+        },
+        pt: {
+            season_label: "TEMPORADA 1 · SORTEIO", top5: "top 5", per_day: "Hoje", per_week: "Semana", per_season: "Temporada",
+            hint_score: "Melhor partida da temporada · top 5 ganha USDT", hint_score_day: "Hoje até 00:00 UTC · melhor partida", hint_score_week: "Semana seg–dom · melhor partida",
+            hint_ref_pts: "Amigo que joga = 1 pt · fiel +1 · amigo de amigo +0.5",
+            board_local: "O ranking abre no início da temporada.<br>Seu recorde neste aparelho: {n}.",
+            pin_no_rank: "Jogue uma partida de ranking para entrar", pin_no_rank_ref: "Convide um amigo — pontos por quem joga",
+            pin_season_soon: "A temporada começa em breve", pin_in_prize: "Você está nos prêmios — segure!", pin_goal: "Faltam {d} para prêmio ({n}º)", you_cap: "Você",
+            lcd_soon: "EM BREVE", lcd_d: "D",
+            rk_0: "Minhoca", rk_1: "Cobra-d'água", rk_2: "Jiboia", rk_3: "Naja", rk_4: "Sucuri",
+            rank_next: "Faltam {n} pontos de recorde para «{r}»", rank_max: "Nível máximo. Lenda!",
+            streak_days: "{n} d", place_season: "#{n} na temporada", no_place: "sem posição",
+            lcd_record: "RECORDE", lcd_last: "ÚLTIMAS 12", lcd_games: "PART.", lcd_avg: "MÉD.", lcd_lv: "NÍV.", lcd_h: "H", lcd_min: "M",
+            ach_title: "Conquistas", ach_first: "Primeira", ach_1000: "1000 pts", ach_lv10: "Nível 10", ach_7d: "7 dias", ach_ref3: "Encantador", ach_wrap: "Sem muros",
+            tasks_title: "Tarefas do dia", tasks_left: "faltam {t}", task_games: "Jogue 3 partidas", task_score: "Faça 300 numa partida", task_share: "Compartilhe o jogo",
+            friends_card: "Meus amigos · pontos", friends_card_none: "Convide amigos — pontos por quem joga", friends_card_rank: "#{r} entre convidadores",
+            fr_title: "Meus amigos", fr_points: "PONTOS", fr_rank: "#{n} entre convidadores", fr_norank: "Ainda sem pontos",
+            fr_prize_line: "Prêmios top {n}, até {p}", fr_how: "Como contam os pontos",
+            fr_s1: "Jogou {g} partidas em {d} dias diferentes", fr_s2: "Voltou no dia {n}", fr_s3: "O amigo dele também contou",
+            fr_note: "Só abrir o link = 0 pontos. Os pontos aparecem {h} h após a verificação. Bots e falsos são removidos.",
+            fr_offline: "A lista aparece no início da temporada. Já pode enviar seu link.",
+            fr_empty: "Ninguém ainda. Envie seu link!", fr_list: "Amigos", fr_joined: "{n} entraram", fr_ladder: "Emblemas por amigos",
+            st_joined: "Entrou", st_playing: "{g}/{m} part.", st_counted: "Conta", st_loyal: "Fiel", st_review: "Revisão", st_revoked: "Removido",
+            sub_joined: "não jogou — lembre", sub_playing: "faltam {n} part., dias: {d}", sub_counted: "dia {n} de {m}", sub_loyal: "recorde {b}", sub_pending: "+{p} após verificação",
+            l2_line: "Amigos dos seus amigos: {n}", lad_1: "1º amigo", lad_3: "Encantador", lad_5: "Bando", lad_10: "Líder", lad_25: "Lenda",
+            invite_btn: "Convidar amigo"
+        },
+        de: {
+            season_label: "SAISON 1 · GEWINNSPIEL", top5: "Top 5", per_day: "Heute", per_week: "Woche", per_season: "Saison",
+            hint_score: "Bestes Spiel der Saison · Top 5 gewinnen USDT", hint_score_day: "Heute bis 00:00 UTC · bestes Spiel", hint_score_week: "Woche Mo–So · bestes Spiel",
+            hint_ref_pts: "Freund spielt = 1 Pkt · treu +1 · Freund vom Freund +0.5",
+            board_local: "Die Rangliste öffnet mit dem Saisonstart.<br>Dein Rekord auf diesem Gerät: {n}.",
+            pin_no_rank: "Spiel ein Ranglistenspiel, um reinzukommen", pin_no_rank_ref: "Lade Freunde ein — Punkte für alle, die spielen",
+            pin_season_soon: "Die Saison startet bald", pin_in_prize: "Du bist in den Preisrängen!", pin_goal: "Noch {d} bis zum Preis (Platz {n})", you_cap: "Du",
+            lcd_soon: "BALD", lcd_d: "T",
+            rk_0: "Wurm", rk_1: "Natter", rk_2: "Boa", rk_3: "Kobra", rk_4: "Anakonda",
+            rank_next: "Noch {n} Rekordpunkte bis «{r}»", rank_max: "Höchster Rang. Legende!",
+            streak_days: "{n} T", place_season: "#{n} in der Saison", no_place: "kein Platz",
+            lcd_record: "REKORD", lcd_last: "LETZTE 12", lcd_games: "SPIELE", lcd_avg: "SCHN.", lcd_lv: "LV", lcd_h: "H", lcd_min: "M",
+            ach_title: "Erfolge", ach_first: "Erstes Spiel", ach_1000: "1000 Pkt", ach_lv10: "Level 10", ach_7d: "7 Tage", ach_ref3: "Beschwörer", ach_wrap: "Ohne Wände",
+            tasks_title: "Tagesaufgaben", tasks_left: "noch {t}", task_games: "Spiel 3 Runden", task_score: "Hol 300 in einem Spiel", task_share: "Teile das Spiel",
+            friends_card: "Meine Freunde · Punkte", friends_card_none: "Lade Freunde ein — Punkte für alle, die spielen", friends_card_rank: "#{r} unter Einladenden",
+            fr_title: "Meine Freunde", fr_points: "PUNKTE", fr_rank: "#{n} unter Einladenden", fr_norank: "Noch keine Punkte",
+            fr_prize_line: "Preise für Top {n}, bis {p}", fr_how: "So zählen Punkte",
+            fr_s1: "{g} Spiele an {d} verschiedenen Tagen", fr_s2: "Am Tag {n} zurückgekommen", fr_s3: "Sein Freund zählt auch",
+            fr_note: "Nur den Link öffnen = 0 Punkte. Punkte erscheinen {h} Std. nach Prüfung. Bots und Fakes werden entfernt.",
+            fr_offline: "Die Liste erscheint mit dem Saisonstart. Du kannst deinen Link schon senden.",
+            fr_empty: "Noch niemand. Schick deinen Link!", fr_list: "Freunde", fr_joined: "{n} beigetreten", fr_ladder: "Abzeichen für Freunde",
+            st_joined: "Beigetreten", st_playing: "{g}/{m} Spiele", st_counted: "Zählt", st_loyal: "Treu", st_review: "Prüfung", st_revoked: "Entfernt",
+            sub_joined: "hat nicht gespielt — erinnern", sub_playing: "noch {n} Spiele, Tage: {d}", sub_counted: "Tag {n} von {m}", sub_loyal: "Rekord {b}", sub_pending: "+{p} nach Prüfung",
+            l2_line: "Freunde deiner Freunde: {n}", lad_1: "Erster Freund", lad_3: "Beschwörer", lad_5: "Rudel", lad_10: "Anführer", lad_25: "Legende",
+            invite_btn: "Freund einladen"
+        },
+        pl: {
+            season_label: "SEZON 1 · KONKURS", top5: "top 5", per_day: "Dziś", per_week: "Tydzień", per_season: "Sezon",
+            hint_score: "Najlepsza gra w sezonie · top 5 wygrywa USDT", hint_score_day: "Dziś do 00:00 UTC · najlepsza gra", hint_score_week: "Tydzień pn–nd · najlepsza gra",
+            hint_ref_pts: "Znajomy gra = 1 pkt · wierny +1 · znajomy znajomego +0.5",
+            board_local: "Ranking ruszy ze startem sezonu.<br>Twój rekord na tym urządzeniu: {n}.",
+            pin_no_rank: "Zagraj grę rankingową, by trafić do tabeli", pin_no_rank_ref: "Zaproś znajomego — punkty za tych, którzy grają",
+            pin_season_soon: "Sezon wkrótce", pin_in_prize: "Jesteś w nagrodach — trzymaj się!", pin_goal: "Do nagrody (miejsce {n}) jeszcze {d}", you_cap: "Ty",
+            lcd_soon: "WKRÓTCE", lcd_d: "D",
+            rk_0: "Robak", rk_1: "Zaskroniec", rk_2: "Boa", rk_3: "Kobra", rk_4: "Anakonda",
+            rank_next: "Do «{r}» jeszcze {n} pkt rekordu", rank_max: "Najwyższa ranga. Legenda!",
+            streak_days: "{n} dni", place_season: "#{n} w sezonie", no_place: "bez miejsca",
+            lcd_record: "REKORD", lcd_last: "OSTATNIE 12", lcd_games: "GIER", lcd_avg: "ŚR.", lcd_lv: "POZ.", lcd_h: "G", lcd_min: "M",
+            ach_title: "Osiągnięcia", ach_first: "Pierwsza gra", ach_1000: "1000 pkt", ach_lv10: "Poziom 10", ach_7d: "7 dni", ach_ref3: "Zaklinacz", ach_wrap: "Bez ścian",
+            tasks_title: "Zadania dnia", tasks_left: "jeszcze {t}", task_games: "Zagraj 3 gry", task_score: "Zdobądź 300 w grze", task_share: "Udostępnij grę",
+            friends_card: "Moi znajomi · punkty", friends_card_none: "Zaproś znajomych — punkty za tych, którzy grają", friends_card_rank: "#{r} wśród zapraszających",
+            fr_title: "Moi znajomi", fr_points: "PUNKTÓW", fr_rank: "#{n} wśród zapraszających", fr_norank: "Na razie bez punktów",
+            fr_prize_line: "Nagrody top {n}, do {p}", fr_how: "Jak liczą się punkty",
+            fr_s1: "Zagrał {g} gier w {d} różne dni", fr_s2: "Wrócił w dniu {n}", fr_s3: "Jego znajomy też zaliczony",
+            fr_note: "Samo wejście z linku = 0 pkt. Punkty pojawiają się {h} h po sprawdzeniu. Boty i fejki są usuwane.",
+            fr_offline: "Lista pojawi się ze startem sezonu. Link możesz wysyłać już teraz.",
+            fr_empty: "Na razie nikt. Wyślij link znajomym!", fr_list: "Znajomi", fr_joined: "weszło {n}", fr_ladder: "Odznaki za znajomych",
+            st_joined: "Wszedł", st_playing: "{g}/{m} gier", st_counted: "Zaliczony", st_loyal: "Wierny", st_review: "Weryfikacja", st_revoked: "Usunięty",
+            sub_joined: "jeszcze nie grał — przypomnij", sub_playing: "jeszcze {n} gier, dni: {d}", sub_counted: "dzień {n} z {m}", sub_loyal: "rekord {b}", sub_pending: "+{p} po weryfikacji",
+            l2_line: "Znajomi twoich znajomych: {n}", lad_1: "Pierwszy", lad_3: "Zaklinacz", lad_5: "Wataha", lad_10: "Przywódca", lad_25: "Legenda",
+            invite_btn: "Zaproś znajomego"
+        },
+        tr: {
+            season_label: "SEZON 1 · ÇEKİLİŞ", top5: "ilk 5", per_day: "Bugün", per_week: "Hafta", per_season: "Sezon",
+            hint_score: "Sezonun en iyi oyunu · ilk 5 USDT kazanır", hint_score_day: "Bugün 00:00 UTC'ye kadar · en iyi oyun", hint_score_week: "Hafta Pzt–Paz · en iyi oyun",
+            hint_ref_pts: "Oynayan arkadaş = 1 puan · sadık +1 · arkadaşın arkadaşı +0.5",
+            board_local: "Sıralama sezon başlayınca açılır.<br>Bu cihazdaki rekorun: {n}.",
+            pin_no_rank: "Tabloya girmek için sıralama oyunu oyna", pin_no_rank_ref: "Arkadaş davet et — oynayanlar için puan",
+            pin_season_soon: "Sezon yakında başlıyor", pin_in_prize: "Ödül bölgesindesin — yerini koru!", pin_goal: "Ödüle ({n}. sıra) {d} kaldı", you_cap: "Sen",
+            lcd_soon: "YAKINDA", lcd_d: "G",
+            rk_0: "Solucan", rk_1: "Su yılanı", rk_2: "Boa", rk_3: "Kobra", rk_4: "Anakonda",
+            rank_next: "«{r}» için {n} rekor puanı kaldı", rank_max: "En yüksek rütbe. Efsane!",
+            streak_days: "{n} gün", place_season: "Sezonda #{n}", no_place: "sıra yok",
+            lcd_record: "REKOR", lcd_last: "SON 12 OYUN", lcd_games: "OYUN", lcd_avg: "ORT.", lcd_lv: "SV.", lcd_h: "S", lcd_min: "D",
+            ach_title: "Başarımlar", ach_first: "İlk oyun", ach_1000: "1000 puan", ach_lv10: "Seviye 10", ach_7d: "7 gün", ach_ref3: "Yılan oynatıcı", ach_wrap: "Duvarsız",
+            tasks_title: "Günlük görevler", tasks_left: "{t} kaldı", task_games: "3 oyun oyna", task_score: "Bir oyunda 300 yap", task_share: "Oyunu paylaş",
+            friends_card: "Arkadaşlarım · puan", friends_card_none: "Arkadaş davet et — oynayanlar için puan", friends_card_rank: "Davet edenler arasında #{r}",
+            fr_title: "Arkadaşlarım", fr_points: "PUAN", fr_rank: "Davet edenler arasında #{n}", fr_norank: "Henüz puan yok",
+            fr_prize_line: "İlk {n} için ödül, {p}'e kadar", fr_how: "Puanlar nasıl sayılır",
+            fr_s1: "{d} farklı günde {g} oyun", fr_s2: "{n}. gün geri döndü", fr_s3: "Onun arkadaşı da sayıldı",
+            fr_note: "Sadece bağlantıyı açmak = 0 puan. Puanlar kontrolden {h} saat sonra görünür. Botlar ve sahteler silinir.",
+            fr_offline: "Liste sezon başlayınca görünecek. Bağlantını şimdiden gönderebilirsin.",
+            fr_empty: "Henüz kimse yok. Bağlantını gönder!", fr_list: "Arkadaşlar", fr_joined: "{n} katıldı", fr_ladder: "Arkadaş rozetleri",
+            st_joined: "Katıldı", st_playing: "{g}/{m} oyun", st_counted: "Sayıldı", st_loyal: "Sadık", st_review: "İnceleme", st_revoked: "Silindi",
+            sub_joined: "henüz oynamadı — hatırlat", sub_playing: "{n} oyun, {d} gün kaldı", sub_counted: "{m} günün {n}.", sub_loyal: "rekor {b}", sub_pending: "kontrolden sonra +{p}",
+            l2_line: "Arkadaşlarının arkadaşları: {n}", lad_1: "İlk arkadaş", lad_3: "Oynatıcı", lad_5: "Sürü", lad_10: "Lider", lad_25: "Efsane",
+            invite_btn: "Arkadaş davet et"
+        }
+    };
+    for (var lg2 in TABS2) for (var k2 in TABS2[lg2]) D[lg2][k2] = TABS2[lg2][k2];
+
     /* Long legal texts: Ukrainian, English and Russian; other languages show English. */
     function rulesHtml(lang, a) {
         var L = a.list;
@@ -336,8 +548,8 @@
             "<h4>2. Строки</h4><p>Розіграш триває до " + a.ends + " (час вашого пристрою). Результати після цього моменту не враховуються.</p>" +
             "<h4>3. Хто може брати участь</h4><ul><li>Повнолітні користувачі Telegram.</li><li>Один гравець — один акаунт. Мультиакаунти дискваліфікуються.</li></ul>" +
             "<h4>4. Призовий фонд — " + a.pool + "</h4><p><b>Рекорди</b> — найвищий результат у рейтинговому режимі:</p><ul>" + L(a.prizesScore, "місце") + "</ul>" +
-            "<p><b>Друзі</b> — найбільше зарахованих друзів:</p><ul>" + L(a.prizesRef, "місце") + "</ul>" +
-            "<p>Друг зараховується, якщо він новий гравець, перейшов за вашим посиланням, зіграв щонайменше " + a.g + " рейтингові гри і набрав " + a.s + "+ очок. При однаковому результаті вище той, хто досяг його раніше.</p>" +
+            "<p><b>Друзі</b> — найбільше балів за запрошених друзів:</p><ul>" + L(a.prizesRef, "місце") + "</ul>" +
+            "<p>Бали: друг — новий гравець, що перейшов за вашим посиланням і зіграв " + a.g + " рейтингових ігор у " + a.d + " різні дні — +1 бал; той самий друг зіграв на " + a.l + "-й день після входу — ще +1; друг вашого друга зарахований — +0.5. Перехід без гри — 0 балів. Бали зараховуються через " + a.h + " год. Щоб потрапити в призи, запрошувач сам має зіграти щонайменше " + a.g + " рейтингових ігор. При однаковій кількості балів вище той, хто набрав їх раніше. Незвично велика кількість нових друзів за добу перевіряється вручну.</p>" +
             "<h4>5. Чесна гра</h4><ul><li>Кожна рейтингова гра перевіряється на сервері: сервер повністю перепроходить її і сам рахує очки.</li><li>Заборонено: боти, скрипти, автоклікери, зміна коду гри, накрутка фейкових друзів.</li><li>Перед виплатою організатор переглядає записи ігор і запрошених друзів переможців і може дискваліфікувати за порушення.</li></ul>" +
             "<h4>6. Виплата</h4><p>Переможців оголосимо в боті протягом 3 днів після завершення. Переможець має відповісти протягом 72 годин і надати адресу гаманця USDT або TON. Виплата — протягом 7 днів після підтвердження. Якщо переможець не відповів, приз переходить до наступного місця.</p>" +
             "<h4>7. Інше</h4><ul><li>Податки та обов'язки за законами своєї країни переможець сплачує самостійно.</li><li>Участь безкоштовна, покупки не потрібні.</li><li>Організатор може змінити правила, повідомивши про це в боті.</li></ul>";
@@ -346,8 +558,8 @@
             "<h4>2. Сроки</h4><p>Розыгрыш длится до " + a.ends + " (время вашего устройства). Результаты после этого момента не учитываются.</p>" +
             "<h4>3. Кто может участвовать</h4><ul><li>Совершеннолетние пользователи Telegram.</li><li>Один игрок — один аккаунт. Мультиаккаунты дисквалифицируются.</li></ul>" +
             "<h4>4. Призовой фонд — " + a.pool + "</h4><p><b>Рекорды</b> — лучший результат в рейтинговом режиме:</p><ul>" + L(a.prizesScore, "место") + "</ul>" +
-            "<p><b>Друзья</b> — больше всего засчитанных друзей:</p><ul>" + L(a.prizesRef, "место") + "</ul>" +
-            "<p>Друг засчитывается, если он новый игрок, перешёл по вашей ссылке, сыграл минимум " + a.g + " рейтинговые игры и набрал " + a.s + "+ очков. При равном результате выше тот, кто достиг его раньше.</p>" +
+            "<p><b>Друзья</b> — больше всего баллов за приглашённых друзей:</p><ul>" + L(a.prizesRef, "место") + "</ul>" +
+            "<p>Баллы: друг — новый игрок, перешедший по вашей ссылке и сыгравший " + a.g + " рейтинговых игр в " + a.d + " разных дня — +1 балл; тот же друг сыграл на " + a.l + "-й день после входа — ещё +1; друг вашего друга засчитан — +0.5. Переход без игры — 0 баллов. Баллы засчитываются через " + a.h + " ч. Чтобы попасть в призы, приглашающий сам должен сыграть минимум " + a.g + " рейтинговых игр. При равных баллах выше тот, кто набрал их раньше. Необычно большое число новых друзей за сутки проверяется вручную.</p>" +
             "<h4>5. Честная игра</h4><ul><li>Каждая рейтинговая игра проверяется на сервере: сервер полностью переигрывает её и сам считает очки.</li><li>Запрещено: боты, скрипты, автокликеры, изменение кода игры, накрутка фейковых друзей.</li><li>Перед выплатой организатор проверяет записи игр и приглашённых друзей победителей и может дисквалифицировать за нарушения.</li></ul>" +
             "<h4>6. Выплата</h4><p>Победителей объявим в боте в течение 3 дней после завершения. Победитель должен ответить в течение 72 часов и указать адрес кошелька USDT или TON. Выплата — в течение 7 дней после подтверждения. Если победитель не ответил, приз переходит следующему месту.</p>" +
             "<h4>7. Прочее</h4><ul><li>Налоги и обязанности по законам своей страны победитель оплачивает самостоятельно.</li><li>Участие бесплатное, покупки не нужны.</li><li>Организатор может изменить правила, сообщив об этом в боте.</li></ul>";
@@ -356,8 +568,8 @@
             "<h4>2. Dates</h4><p>The giveaway runs until " + a.ends + " (your device's time). Results after that moment don't count.</p>" +
             "<h4>3. Who can take part</h4><ul><li>Telegram users of legal age.</li><li>One player — one account. Multiple accounts are disqualified.</li></ul>" +
             "<h4>4. Prize pool — " + a.pool + "</h4><p><b>High scores</b> — best result in ranked mode:</p><ul>" + L(a.prizesScore, "place") + "</ul>" +
-            "<p><b>Friends</b> — most counted friends:</p><ul>" + L(a.prizesRef, "place") + "</ul>" +
-            "<p>A friend counts if they are a new player, joined via your link, played at least " + a.g + " ranked games and scored " + a.s + "+ points. On a tie, whoever reached the result first ranks higher.</p>" +
+            "<p><b>Friends</b> — most friend points:</p><ul>" + L(a.prizesRef, "place") + "</ul>" +
+            "<p>Points: a friend — a new player who joined via your link and played " + a.g + " ranked games on " + a.d + " different days — gives +1 point; the same friend playing on day " + a.l + " after joining gives +1 more; a friend of your friend being counted gives +0.5. Joining without playing gives 0. Points are credited after " + a.h + " hours. To be eligible for prizes the inviter must also play at least " + a.g + " ranked games. On a tie, whoever reached the points first ranks higher. An unusually large number of new friends in a day is reviewed manually.</p>" +
             "<h4>5. Fair play</h4><ul><li>Every ranked game is verified on the server: the server replays it in full and calculates the score itself.</li><li>Not allowed: bots, scripts, auto-clickers, modifying the game, fake referrals.</li><li>Before paying out, the organizer reviews the winners' game records and invited friends and may disqualify for violations.</li></ul>" +
             "<h4>6. Payout</h4><p>Winners are announced in the bot within 3 days after the end. A winner must reply within 72 hours with a USDT or TON wallet address. Payout within 7 days after confirmation. If a winner doesn't reply, the prize goes to the next place.</p>" +
             "<h4>7. Other</h4><ul><li>Winners are responsible for any taxes and obligations under the laws of their country.</li><li>Participation is free, no purchase necessary.</li><li>The organizer may change the rules with notice in the bot.</li></ul>";
