@@ -527,6 +527,11 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-in
 .big-key:active { transform: translateY(3px); box-shadow: inset 0 2px 0 rgba(255,255,255,.5), 0 2px 0 #4d6a22; }
 .sq-key { height: 52px; border-radius: 18px; display: grid; place-items: center; color: #c5ced8; background: linear-gradient(180deg, #4a5568, #2a313d); box-shadow: inset 0 1px 0 rgba(255,255,255,.15), 0 5px 0 #0a0d12; }
 .sq-key svg { width: 20px; height: 20px; }
+.sheet .body .lead { font-size: 15px; color: var(--text); line-height: 1.5; margin: 0 0 6px; }
+.sheet .body .warn { padding: 10px 12px; border-radius: 12px; background: rgba(255,180,58,.08); border: 1px solid rgba(255,180,58,.3); color: #ffd9a0; }
+.sheet .body li { margin: 4px 0; }
+.sheet .body b { color: var(--text); }
+.doc-links { display: flex; flex-direction: column; gap: 8px; margin-top: 22px; }
 </style>
 </head>
 <body>
@@ -731,7 +736,8 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-in
             </div>
             <div class="links">
                 <button class="btn ghost block" data-open="rules" data-i18n="rules_full">Правила розіграшу</button>
-                <button class="btn ghost block" data-open="privacy" data-i18n="privacy">Конфіденційність</button>
+                <button class="btn ghost block" data-open="fair" data-i18n="fair_title">Чесна гра і безпека</button>
+                <button class="btn ghost block" data-open="privacy" data-i18n="privacy_title">Політика конфіденційності</button>
             </div>
         </div>
     </div>
@@ -1695,16 +1701,21 @@ function fmtDate(iso) {
 function legalArgs() {
     const c = C();
     const r = c.ref || SEASON_DEFAULT.ref;
+    const sum = a => a.reduce((x, y) => x + y, 0);
+    const word = I18N.placeWord(LANG);
     return {
         contact: escapeHtml(ORGANIZER_CONTACT),
-        ends: c.endsAt ? escapeHtml(fmtDate(c.endsAt)) : "—",
+        ends: c.endsAt ? escapeHtml(fmtDate(c.endsAt)) : escapeHtml(tr("ends_tba")),
         pool: money(c.pool) + " " + escapeHtml(c.currency || "USDT"),
+        sumScore: money(sum(c.prizesScore)) + " " + escapeHtml(c.currency || "USDT"),
+        sumRef: money(sum(c.prizesRef)) + " " + escapeHtml(c.currency || "USDT"),
         prizesScore: c.prizesScore, prizesRef: c.prizesRef,
-        g: r.minGames, d: r.minDays, l: r.loyalDay, h: r.holdHours || 24,
-        list: a => a.map((p, i) => `<li>#${i + 1} — ${money(p)}</li>`).join("")
+        g: r.minGames, d: r.minDays, l: r.loyalDay, h: r.holdHours || 24, cap: r.dailyCap || 15,
+        list: a => a.map((p, i) => `<li>${i + 1} ${word} — <b>${money(p)}</b></li>`).join("")
     };
 }
 const rulesHtml = () => I18N.rulesHtml(LANG, legalArgs());
+const fairHtml = () => I18N.fairHtml(LANG, legalArgs());
 const privacyHtml = () => I18N.privacyHtml(LANG, legalArgs());
 
 function openPanel(id) {
@@ -1713,8 +1724,11 @@ function openPanel(id) {
     if (tg && tg.BackButton && tgAtLeast("6.1")) tg.BackButton.show();
 }
 function openSheet(kind) {
-    $("sheetTitle").textContent = kind === "privacy" ? tr("privacy") : tr("rules_full");
-    $("sheetBody").innerHTML = kind === "privacy" ? privacyHtml() : rulesHtml();
+    $("sheetTitle").textContent = kind === "privacy" ? tr("privacy_title") : kind === "fair" ? tr("fair_title") : tr("rules_full");
+    $("sheetBody").innerHTML = (kind === "privacy" ? privacyHtml() : kind === "fair" ? fairHtml() : rulesHtml()) +
+        '<div class="doc-links">' + ["rules", "fair", "privacy"].filter(k => k !== kind).map(k =>
+            `<button class="btn ghost block" data-doc="${k}">${tr(k === "rules" ? "rules_full" : k === "fair" ? "fair_title" : "privacy_title")}</button>`).join("") + "</div>";
+    $("sheetBody").querySelectorAll("[data-doc]").forEach(b => b.addEventListener("click", () => openSheet(b.dataset.doc)));
     $("sheetBody").scrollTop = 0;
     openPanel("sheet");
 }
