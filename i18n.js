@@ -542,6 +542,49 @@
     D.uk.ends_tba = "дати, оголошеної в боті"; D.en.ends_tba = "the date announced in the bot"; D.ru.ends_tba = "даты, объявленной в боте";
     var CH = {"uk": "📢 Канал GGSNAKE", "en": "📢 GGSNAKE channel", "ru": "📢 Канал GGSNAKE", "es": "📢 Canal GGSNAKE", "pt": "📢 Canal GGSNAKE", "de": "📢 GGSNAKE-Kanal", "pl": "📢 Kanał GGSNAKE", "tr": "📢 GGSNAKE kanalı"};
     for (var lc in CH) D[lc].channel_btn = CH[lc];
+    var UI3 = {
+        uk: { ctl_tap_pause: "ПАУЗА — ТАП", hint_score_plain: "Найкраща гра за сезон", pin_in_top: "Ти в топ-{n} — тримай місце!", pin_goal_top: "До топ-{n} ще {d}",
+              fr_board_line: "Чим більше балів — тим вище в рейтингу друзів", ach_all: "Усі",
+              board_local: "Таблиця рекордів запуститься зовсім скоро.<br>Твій рекорд {n} уже збережено — тренуйся!", pin_season_soon: "Таблиця запуститься зовсім скоро",
+              ach_first_d: "Зіграй свою першу гру.", ach_1000_d: "Набери 1000 очок за одну гру.", ach_lv10_d: "Дійди до 10-го рівня в одній грі.",
+              ach_7d_d: "Грай 7 днів поспіль — хоча б одна гра на день.", ach_ref3_d: "Запроси 3 друзів, які справді грають.", ach_wrap_d: "Зіграй гру в режимі «Тренування», де змійка проходить крізь стіни." },
+        en: { ctl_tap_pause: "TAP — PAUSE", hint_score_plain: "Best game this season", pin_in_top: "You're in the top {n} — hold on!", pin_goal_top: "{d} more to the top {n}",
+              fr_board_line: "More points — higher on the friends leaderboard", ach_all: "All",
+              board_local: "The leaderboard launches very soon.<br>Your best of {n} is already saved — keep practising!", pin_season_soon: "The leaderboard launches very soon",
+              ach_first_d: "Play your first game.", ach_1000_d: "Score 1000 points in a single game.", ach_lv10_d: "Reach level 10 in a single game.",
+              ach_7d_d: "Play 7 days in a row — at least one game a day.", ach_ref3_d: "Invite 3 friends who actually play.", ach_wrap_d: "Play a game in Training mode, where the snake goes through walls." },
+        ru: { ctl_tap_pause: "ПАУЗА — ТАП", hint_score_plain: "Лучшая игра за сезон", pin_in_top: "Ты в топ-{n} — держи место!", pin_goal_top: "До топ-{n} ещё {d}",
+              fr_board_line: "Больше баллов — выше в рейтинге друзей", ach_all: "Все",
+              board_local: "Таблица рекордов запустится совсем скоро.<br>Твой рекорд {n} уже сохранён — тренируйся!", pin_season_soon: "Таблица запустится совсем скоро",
+              ach_first_d: "Сыграй свою первую игру.", ach_1000_d: "Набери 1000 очков за одну игру.", ach_lv10_d: "Дойди до 10-го уровня в одной игре.",
+              ach_7d_d: "Играй 7 дней подряд — хотя бы одна игра в день.", ach_ref3_d: "Пригласи 3 друзей, которые реально играют.", ach_wrap_d: "Сыграй в режиме «Тренировка», где змейка проходит сквозь стены." },
+        es: { ctl_tap_pause: "TOCA — PAUSA", hint_score_plain: "Mejor partida de la temporada", pin_in_top: "¡Estás en el top {n}!", pin_goal_top: "Faltan {d} para el top {n}",
+              fr_board_line: "Más puntos — más arriba en el ranking de amigos", ach_all: "Todos",
+              board_local: "El ranking se lanza muy pronto.<br>Tu récord de {n} ya está guardado — ¡entrena!", pin_season_soon: "El ranking se lanza muy pronto",
+              ach_first_d: "Juega tu primera partida.", ach_1000_d: "Consigue 1000 puntos en una partida.", ach_lv10_d: "Llega al nivel 10 en una partida.",
+              ach_7d_d: "Juega 7 días seguidos.", ach_ref3_d: "Invita a 3 amigos que jueguen de verdad.", ach_wrap_d: "Juega en modo Entrenamiento, donde la serpiente atraviesa muros." },
+        pt: { ctl_tap_pause: "TOQUE — PAUSA", hint_score_plain: "Melhor partida da temporada", pin_in_top: "Você está no top {n}!", pin_goal_top: "Faltam {d} para o top {n}",
+              fr_board_line: "Mais pontos — mais alto no ranking de amigos", ach_all: "Todas",
+              board_local: "O ranking abre muito em breve.<br>Seu recorde de {n} já está salvo — treine!", pin_season_soon: "O ranking abre muito em breve",
+              ach_first_d: "Jogue sua primeira partida.", ach_1000_d: "Faça 1000 pontos em uma partida.", ach_lv10_d: "Chegue ao nível 10 em uma partida.",
+              ach_7d_d: "Jogue 7 dias seguidos.", ach_ref3_d: "Convide 3 amigos que joguem de verdade.", ach_wrap_d: "Jogue no modo Treino, onde a cobra atravessa paredes." },
+        de: { ctl_tap_pause: "TIPPEN — PAUSE", hint_score_plain: "Bestes Spiel der Saison", pin_in_top: "Du bist in den Top {n}!", pin_goal_top: "Noch {d} bis zu den Top {n}",
+              fr_board_line: "Mehr Punkte — höher in der Freunde-Rangliste", ach_all: "Alle",
+              board_local: "Die Rangliste startet sehr bald.<br>Dein Rekord {n} ist gespeichert — üb weiter!", pin_season_soon: "Die Rangliste startet sehr bald",
+              ach_first_d: "Spiel dein erstes Spiel.", ach_1000_d: "Hol 1000 Punkte in einem Spiel.", ach_lv10_d: "Erreiche Level 10 in einem Spiel.",
+              ach_7d_d: "Spiel 7 Tage am Stück.", ach_ref3_d: "Lade 3 Freunde ein, die wirklich spielen.", ach_wrap_d: "Spiel im Trainingsmodus, in dem die Schlange durch Wände geht." },
+        pl: { ctl_tap_pause: "STUKNIJ — PAUZA", hint_score_plain: "Najlepsza gra w sezonie", pin_in_top: "Jesteś w top {n}!", pin_goal_top: "Do top {n} jeszcze {d}",
+              fr_board_line: "Więcej punktów — wyżej w rankingu znajomych", ach_all: "Wszystkie",
+              board_local: "Ranking ruszy już wkrótce.<br>Twój rekord {n} jest zapisany — trenuj!", pin_season_soon: "Ranking ruszy już wkrótce",
+              ach_first_d: "Zagraj swoją pierwszą grę.", ach_1000_d: "Zdobądź 1000 punktów w jednej grze.", ach_lv10_d: "Dojdź do 10. poziomu w jednej grze.",
+              ach_7d_d: "Graj 7 dni z rzędu.", ach_ref3_d: "Zaproś 3 znajomych, którzy naprawdę grają.", ach_wrap_d: "Zagraj w trybie Trening, gdzie wąż przechodzi przez ściany." },
+        tr: { ctl_tap_pause: "DOKUN — DURAKLAT", hint_score_plain: "Sezonun en iyi oyunu", pin_in_top: "İlk {n}'tesin!", pin_goal_top: "İlk {n} için {d} kaldı",
+              fr_board_line: "Daha çok puan — arkadaş sıralamasında daha yukarı", ach_all: "Tümü",
+              board_local: "Sıralama çok yakında açılıyor.<br>{n} rekorun kaydedildi — antrenmana devam!", pin_season_soon: "Sıralama çok yakında açılıyor",
+              ach_first_d: "İlk oyununu oyna.", ach_1000_d: "Tek oyunda 1000 puan yap.", ach_lv10_d: "Tek oyunda 10. seviyeye ulaş.",
+              ach_7d_d: "7 gün üst üste oyna.", ach_ref3_d: "Gerçekten oynayan 3 arkadaş davet et.", ach_wrap_d: "Yılanın duvarlardan geçtiği Antrenman modunda oyna." }
+    };
+    for (var l3 in UI3) for (var k3 in UI3[l3]) D[l3][k3] = UI3[l3][k3];
     var FAIR = {"uk": "Чесна гра і безпека", "en": "Fair play & security", "ru": "Честная игра и безопасность", "es": "Juego limpio y seguridad", "pt": "Jogo limpo e segurança", "de": "Fair Play & Sicherheit", "pl": "Uczciwa gra i bezpieczeństwo", "tr": "Adil oyun ve güvenlik"};
     for (var lf in FAIR) D[lf].fair_title = FAIR[lf];
     D.uk.privacy = "Конфіденційність"; D.uk.privacy_title = "Політика конфіденційності"; D.en.privacy_title = "Privacy policy"; D.ru.privacy_title = "Политика конфиденциальности";
@@ -595,43 +638,36 @@
             },
             privacy: function (a) {
                 return "" +
-                "<p class='lead'>Ми збираємо мінімум даних — лише те, без чого не працюють гра, рейтинг, захист від накруток і виплата призів.</p>" +
-                "<h4>1. Хто обробляє дані</h4><p>Команда гри GGSNAKE (бот @ggsnake_game_bot). Питання щодо даних: " + a.contact + ".</p>" +
-                "<h4>2. Які дані ми отримуємо</h4><ul>" +
-                "<li><b>Від Telegram</b>, коли ви відкриваєте гру: ваш Telegram ID, ім'я, прізвище (якщо вказане), username, мову інтерфейсу та ознаку Premium. Ми <b>не</b> отримуємо ваш номер телефону, контакти чи повідомлення.</li>" +
-                "<li><b>Ігрові дані</b>: результати, кількість ігор і днів гри, запис ходів рекордних ігор (для перевірки чесності), хто кого запросив, бали за друзів.</li>" +
-                "<li><b>Технічні дані</b>: IP-адресу й дані браузера бачать хостинг-провайдери в службових журналах. У нашій базі даних IP-адреси не зберігаються.</li>" +
-                "<li><b>Дані для виплати</b> (лише переможці): адреса гаманця й листування щодо призу.</li></ul>" +
-                "<h4>3. Що зберігається на вашому пристрої</h4><p>Налаштування, особиста статистика, серія днів і завдання дня зберігаються в пам'яті Telegram на вашому пристрої та нікуди не надсилаються.</p>" +
-                "<h4>4. Навіщо</h4><ul><li>Робота гри, рейтингу й системи друзів.</li><li>Захист від ботів, накруток і мультиакаунтів.</li><li>Проведення розіграшу та виплата призів.</li><li>Повідомлення в боті про гру й розіграш — їх можна вимкнути, зупинивши бота.</li></ul>" +
-                "<h4>5. Що бачать інші гравці</h4><p>У рейтингу показуються лише ваше ім'я з Telegram і результат чи бали. Telegram ID та username нікому не показуються. Той, хто вас запросив, бачить ваше ім'я та статус гри у своєму списку друзів.</p>" +
-                "<h4>6. Кому передаються дані</h4><p>Тільки сервісам, на яких працює гра: Cloudflare (сервер і база даних), GitHub (сторінка гри), Telegram (платформа). Ми не продаємо дані, не використовуємо рекламні мережі та сторонні трекери. Розкриття можливе лише на законну вимогу державних органів.</p>" +
-                "<h4>7. Скільки зберігаємо</h4><p>Дані сезону — протягом сезону та до 12 місяців після нього для розгляду звернень. Дані про виплати — стільки, скільки цього вимагає закон. Решту видаляємо раніше на ваш запит, крім даних, потрібних для незавершеної перевірки порушень.</p>" +
-                "<h4>8. Ваші права</h4><p>Ви можете попросити показати, виправити чи видалити ваші дані, а також заперечити проти їх обробки, написавши " + a.contact + ". Відповідаємо протягом 30 днів. Після видалення даних участь у поточному розіграші неможлива.</p>" +
-                "<h4>9. Захист</h4><p>Усі з'єднання шифруються (HTTPS). Кожен запит гри підтверджується цифровим підписом Telegram, тож видати себе за іншого гравця неможливо. Доступ до адмін-функцій мають лише відповідальні особи Організатора. Паролів ми не збираємо й не зберігаємо.</p>" +
-                "<h4>10. Діти</h4><p>Розіграш — лише для повнолітніх. Якщо ми дізнаємося, що дані належать дитині без згоди батьків, ми їх видалимо.</p>" +
-                "<h4>11. Зміни</h4><p>Про суттєві зміни цієї політики повідомляємо в боті та каналі.</p>";
+                "<p class='lead'>Ми поважаємо вашу приватність і використовуємо дані лише для того, щоб гра працювала чесно й зручно.</p>" +
+                "<h4>1. Хто відповідає</h4><p>Команда гри GGSNAKE (бот @ggsnake_game_bot). З питань приватності: " + a.contact + ".</p>" +
+                "<h4>2. Що ми використовуємо</h4><p>Лише базові дані профілю, які Telegram передає будь-якому міні-застосунку, та ваші ігрові результати. Ми <b>не</b> отримуємо номер телефону, контакти, повідомлення чи паролі.</p>" +
+                "<h4>3. Навіщо</h4><ul><li>Щоб працювали гра, рейтинг і система друзів.</li><li>Щоб захистити рейтинг від ботів і накруток.</li><li>Щоб надсилати повідомлення в боті — їх можна вимкнути, зупинивши бота.</li></ul>" +
+                "<h4>4. Що бачать інші гравці</h4><p>Лише ваше ім'я з Telegram і результат. Ваш Telegram ID та username нікому не показуються.</p>" +
+                "<h4>5. Ми не продаємо дані</h4><p>Ми не продаємо й не передаємо ваші дані рекламним мережам і не використовуємо сторонні трекери. Розкриття можливе лише на законну вимогу державних органів.</p>" +
+                "<h4>6. Ваші права</h4><p>Ви можете попросити показати, виправити чи видалити ваші дані — напишіть " + a.contact + ". Відповідаємо протягом 30 днів.</p>" +
+                "<h4>7. Захист</h4><p>Усі з'єднання зашифровані. Кожен запит гри підтверджується цифровим підписом Telegram, тож видати себе за іншого гравця неможливо.</p>" +
+                "<h4>8. Зміни</h4><p>Про суттєві зміни цієї політики повідомляємо в боті та каналі @ggsnakeofficial.</p>";
             },
             fair: function (a) {
                 return "" +
-                "<p class='lead'>Розіграш чесний лише тоді, коли всі грають за однаковими правилами. Ось як ми це забезпечуємо і як захистити себе.</p>" +
+                "<p class='lead'>Рейтинг чесний лише тоді, коли всі грають за однаковими правилами. Ось як ми це забезпечуємо і як захистити себе.</p>" +
                 "<h4>Як ми перевіряємо кожну гру</h4><ul>" +
                 "<li>Сервер видає кожній рейтинговій грі власне випадкове «зерно» — розташування їжі неможливо передбачити заздалегідь.</li>" +
                 "<li>Після гри сервер перепроходить її хід за ходом і сам рахує очки. Число, яке надсилає телефон, не має значення.</li>" +
                 "<li>Гра, зіграна швидше, ніж це можливо з реальною швидкістю змійки, не зараховується.</li>" +
                 "<li>Кожну гру можна надіслати лише один раз. Діють ліміти частоти ігор.</li>" +
                 "<li>Бали за друзів мають затримку " + a.h + " год. Надто швидкий приріст друзів перевіряється вручну.</li>" +
-                "<li>Записи ігор і списки друзів переможців переглядаються вручну перед виплатою.</li></ul>" +
+                "<li>Результати лідерів додатково перевіряються вручну.</li></ul>" +
                 "<h4>Що заборонено</h4><ul>" +
                 "<li>Боти, скрипти, автоклікери, емулятори натискань.</li>" +
                 "<li>Змінений код гри, підміна запитів, використання помилок гри.</li>" +
                 "<li>Кілька акаунтів одного учасника, купівля чи передача акаунтів, гра за іншу людину.</li>" +
                 "<li>Фейкові друзі: ботоферми, купівля переходів, змушування людей заходити без гри.</li></ul>" +
-                "<h4>Наслідки</h4><p>Анулювання результатів і балів, виключення з розіграшу та блокування в рейтингу. Бали, отримані через заблокованих «друзів», знімаються автоматично.</p>" +
+                "<h4>Наслідки</h4><p>Анулювання результатів і балів та блокування в рейтингу. Бали, отримані через заблокованих «друзів», знімаються автоматично.</p>" +
                 "<h4>Захистіть себе від шахраїв</h4><ul>" +
                 "<li>Офіційний бот — лише <b>@ggsnake_game_bot</b>. Перевіряйте username, а не назву чи аватар.</li>" +
-                "<li>Ми ніколи не просимо оплату за отримання призу, паролі, коди з SMS чи Telegram, seed-фрази або доступ до гаманця.</li>" +
-                "<li>Ми не пишемо першими з особистих акаунтів і не просимо перейти на сторонні сайти для «отримання виграшу».</li>" +
+                "<li>Ми ніколи не просимо оплату, паролі, коди з SMS чи Telegram, seed-фрази або доступ до гаманця.</li>" +
+                "<li>Ми не пишемо першими з особистих акаунтів і не просимо переходити на сторонні сайти. Підтримка — лише @ggsnakeadm.</li>" +
                 "<li>Отримали підозріле повідомлення від імені GGSNAKE? Не відповідайте й повідомте нам: " + a.contact + ".</li></ul>" +
                 "<h4>Знайшли помилку чи вразливість?</h4><p>Повідомте " + a.contact + " і не використовуйте її в рейтингу. Того, хто першим повідомив про суттєву вразливість, ми відзначимо в каналі.</p>";
             }
@@ -680,43 +716,36 @@
             },
             privacy: function (a) {
                 return "" +
-                "<p class='lead'>Мы собираем минимум данных — только то, без чего не работают игра, рейтинг, защита от накруток и выплата призов.</p>" +
-                "<h4>1. Кто обрабатывает данные</h4><p>Команда игры GGSNAKE (бот @ggsnake_game_bot). Вопросы о данных: " + a.contact + ".</p>" +
-                "<h4>2. Какие данные мы получаем</h4><ul>" +
-                "<li><b>От Telegram</b>, когда вы открываете игру: ваш Telegram ID, имя, фамилию (если указана), username, язык интерфейса и признак Premium. Мы <b>не</b> получаем ваш номер телефона, контакты или сообщения.</li>" +
-                "<li><b>Игровые данные</b>: результаты, количество игр и игровых дней, запись ходов рекордных игр (для проверки честности), кто кого пригласил, баллы за друзей.</li>" +
-                "<li><b>Технические данные</b>: IP-адрес и данные браузера видят хостинг-провайдеры в служебных журналах. В нашей базе данных IP-адреса не хранятся.</li>" +
-                "<li><b>Данные для выплаты</b> (только победители): адрес кошелька и переписка о призе.</li></ul>" +
-                "<h4>3. Что хранится на вашем устройстве</h4><p>Настройки, личная статистика, серия дней и задания дня хранятся в памяти Telegram на вашем устройстве и никуда не отправляются.</p>" +
-                "<h4>4. Зачем</h4><ul><li>Работа игры, рейтинга и системы друзей.</li><li>Защита от ботов, накруток и мультиаккаунтов.</li><li>Проведение розыгрыша и выплата призов.</li><li>Сообщения в боте об игре и розыгрыше — их можно отключить, остановив бота.</li></ul>" +
-                "<h4>5. Что видят другие игроки</h4><p>В рейтинге показываются только ваше имя из Telegram и результат или баллы. Telegram ID и username никому не показываются. Пригласивший вас видит ваше имя и статус игры в своём списке друзей.</p>" +
-                "<h4>6. Кому передаются данные</h4><p>Только сервисам, на которых работает игра: Cloudflare (сервер и база данных), GitHub (страница игры), Telegram (платформа). Мы не продаём данные, не используем рекламные сети и сторонние трекеры. Раскрытие возможно только по законному требованию государственных органов.</p>" +
-                "<h4>7. Сколько храним</h4><p>Данные сезона — в течение сезона и до 12 месяцев после него для рассмотрения обращений. Данные о выплатах — столько, сколько требует закон. Остальное удаляем раньше по вашему запросу, кроме данных, нужных для незавершённой проверки нарушений.</p>" +
-                "<h4>8. Ваши права</h4><p>Вы можете попросить показать, исправить или удалить ваши данные, а также возразить против их обработки, написав " + a.contact + ". Отвечаем в течение 30 дней. После удаления данных участие в текущем розыгрыше невозможно.</p>" +
-                "<h4>9. Защита</h4><p>Все соединения шифруются (HTTPS). Каждый запрос игры подтверждается цифровой подписью Telegram, поэтому выдать себя за другого игрока невозможно. Доступ к админ-функциям есть только у ответственных лиц Организатора. Пароли мы не собираем и не храним.</p>" +
-                "<h4>10. Дети</h4><p>Розыгрыш — только для совершеннолетних. Если мы узнаем, что данные принадлежат ребёнку без согласия родителей, мы их удалим.</p>" +
-                "<h4>11. Изменения</h4><p>О существенных изменениях этой политики сообщаем в боте и канале.</p>";
+                "<p class='lead'>Мы уважаем вашу приватность и используем данные только для того, чтобы игра работала честно и удобно.</p>" +
+                "<h4>1. Кто отвечает</h4><p>Команда игры GGSNAKE (бот @ggsnake_game_bot). По вопросам приватности: " + a.contact + ".</p>" +
+                "<h4>2. Что мы используем</h4><p>Только базовые данные профиля, которые Telegram передаёт любому мини-приложению, и ваши игровые результаты. Мы <b>не</b> получаем номер телефона, контакты, сообщения или пароли.</p>" +
+                "<h4>3. Зачем</h4><ul><li>Чтобы работали игра, рейтинг и система друзей.</li><li>Чтобы защитить рейтинг от ботов и накруток.</li><li>Чтобы отправлять сообщения в боте — их можно отключить, остановив бота.</li></ul>" +
+                "<h4>4. Что видят другие игроки</h4><p>Только ваше имя из Telegram и результат. Ваш Telegram ID и username никому не показываются.</p>" +
+                "<h4>5. Мы не продаём данные</h4><p>Мы не продаём и не передаём ваши данные рекламным сетям и не используем сторонние трекеры. Раскрытие возможно только по законному требованию государственных органов.</p>" +
+                "<h4>6. Ваши права</h4><p>Вы можете попросить показать, исправить или удалить ваши данные — напишите " + a.contact + ". Отвечаем в течение 30 дней.</p>" +
+                "<h4>7. Защита</h4><p>Все соединения зашифрованы. Каждый запрос игры подтверждается цифровой подписью Telegram, поэтому выдать себя за другого игрока невозможно.</p>" +
+                "<h4>8. Изменения</h4><p>О существенных изменениях этой политики сообщаем в боте и канале @ggsnakeofficial.</p>";
             },
             fair: function (a) {
                 return "" +
-                "<p class='lead'>Розыгрыш честный только тогда, когда все играют по одинаковым правилам. Вот как мы это обеспечиваем и как защитить себя.</p>" +
+                "<p class='lead'>Рейтинг честный только тогда, когда все играют по одинаковым правилам. Вот как мы это обеспечиваем и как защитить себя.</p>" +
                 "<h4>Как мы проверяем каждую игру</h4><ul>" +
                 "<li>Сервер выдаёт каждой рейтинговой игре собственное случайное «зерно» — расположение еды невозможно предсказать заранее.</li>" +
                 "<li>После игры сервер переигрывает её ход за ходом и сам считает очки. Число, которое присылает телефон, не имеет значения.</li>" +
                 "<li>Игра, сыгранная быстрее, чем это возможно с реальной скоростью змейки, не засчитывается.</li>" +
                 "<li>Каждую игру можно отправить только один раз. Действуют лимиты частоты игр.</li>" +
                 "<li>Баллы за друзей имеют задержку " + a.h + " ч. Слишком быстрый прирост друзей проверяется вручную.</li>" +
-                "<li>Записи игр и списки друзей победителей просматриваются вручную перед выплатой.</li></ul>" +
+                "<li>Результаты лидеров дополнительно проверяются вручную.</li></ul>" +
                 "<h4>Что запрещено</h4><ul>" +
                 "<li>Боты, скрипты, автокликеры, эмуляторы нажатий.</li>" +
                 "<li>Изменённый код игры, подмена запросов, использование ошибок игры.</li>" +
                 "<li>Несколько аккаунтов одного участника, покупка или передача аккаунтов, игра за другого человека.</li>" +
                 "<li>Фейковые друзья: ботофермы, покупка переходов, принуждение заходить без игры.</li></ul>" +
-                "<h4>Последствия</h4><p>Аннулирование результатов и баллов, исключение из розыгрыша и блокировка в рейтинге. Баллы, полученные через заблокированных «друзей», снимаются автоматически.</p>" +
+                "<h4>Последствия</h4><p>Аннулирование результатов и баллов и блокировка в рейтинге. Баллы, полученные через заблокированных «друзей», снимаются автоматически.</p>" +
                 "<h4>Защитите себя от мошенников</h4><ul>" +
                 "<li>Официальный бот — только <b>@ggsnake_game_bot</b>. Проверяйте username, а не название или аватар.</li>" +
-                "<li>Мы никогда не просим оплату за получение приза, пароли, коды из SMS или Telegram, seed-фразы или доступ к кошельку.</li>" +
-                "<li>Мы не пишем первыми с личных аккаунтов и не просим переходить на сторонние сайты для «получения выигрыша».</li>" +
+                "<li>Мы никогда не просим оплату, пароли, коды из SMS или Telegram, seed-фразы или доступ к кошельку.</li>" +
+                "<li>Мы не пишем первыми с личных аккаунтов и не просим переходить на сторонние сайты. Поддержка — только @ggsnakeadm.</li>" +
                 "<li>Получили подозрительное сообщение от имени GGSNAKE? Не отвечайте и сообщите нам: " + a.contact + ".</li></ul>" +
                 "<h4>Нашли ошибку или уязвимость?</h4><p>Сообщите " + a.contact + " и не используйте её в рейтинге. Первого, кто сообщит о существенной уязвимости, мы отметим в канале.</p>";
             }
@@ -765,43 +794,36 @@
             },
             privacy: function (a) {
                 return "" +
-                "<p class='lead'>We collect as little data as possible — only what the game, leaderboard, anti-cheat and prize payouts need.</p>" +
-                "<h4>1. Who processes the data</h4><p>The GGSNAKE game team (bot @ggsnake_game_bot). Data questions: " + a.contact + ".</p>" +
-                "<h4>2. What we receive</h4><ul>" +
-                "<li><b>From Telegram</b>, when you open the game: your Telegram ID, first and last name (if set), username, interface language and Premium flag. We do <b>not</b> receive your phone number, contacts or messages.</li>" +
-                "<li><b>Game data</b>: results, number of games and days played, move records of best games (to verify fair play), who invited whom, friend points.</li>" +
-                "<li><b>Technical data</b>: hosting providers see IP addresses and browser data in service logs. Our database does not store IP addresses.</li>" +
-                "<li><b>Payout data</b> (winners only): wallet address and correspondence about the prize.</li></ul>" +
-                "<h4>3. Stored on your device</h4><p>Settings, personal stats, day streak and daily tasks are kept in Telegram's storage on your device and are not sent anywhere.</p>" +
-                "<h4>4. Why</h4><ul><li>Running the game, leaderboard and friend system.</li><li>Protection against bots, cheating and multiple accounts.</li><li>Running the giveaway and paying prizes.</li><li>Bot messages about the game and giveaway — you can turn them off by stopping the bot.</li></ul>" +
-                "<h4>5. What other players see</h4><p>The leaderboard shows only your Telegram first name and your score or points. Telegram IDs and usernames are never shown. Whoever invited you sees your name and play status in their friends list.</p>" +
-                "<h4>6. Who receives data</h4><p>Only the services the game runs on: Cloudflare (server and database), GitHub (game page), Telegram (platform). We don't sell data and use no ad networks or third-party trackers. Disclosure happens only on a lawful request from authorities.</p>" +
-                "<h4>7. Retention</h4><p>Season data — during the season and up to 12 months after for handling requests. Payout records — as long as the law requires. Anything else is deleted earlier on request, except data needed for an open fraud investigation.</p>" +
-                "<h4>8. Your rights</h4><p>You can ask to see, correct or delete your data, or object to its processing, by writing to " + a.contact + ". We reply within 30 days. Once data is deleted you can no longer take part in the current giveaway.</p>" +
-                "<h4>9. Security</h4><p>All connections are encrypted (HTTPS). Every game request is verified with Telegram's digital signature, so nobody can pretend to be another player. Only authorized Organizer staff can access admin functions. We never collect or store passwords.</p>" +
-                "<h4>10. Children</h4><p>The giveaway is for adults only. If we learn that data belongs to a child without parental consent, we delete it.</p>" +
-                "<h4>11. Changes</h4><p>We announce significant changes to this policy in the bot and channel.</p>";
+                "<p class='lead'>We respect your privacy and use data only to keep the game fair and working smoothly.</p>" +
+                "<h4>1. Who is responsible</h4><p>The GGSNAKE game team (bot @ggsnake_game_bot). Privacy questions: " + a.contact + ".</p>" +
+                "<h4>2. What we use</h4><p>Only the basic profile data that Telegram shares with any mini app, and your game results. We do <b>not</b> receive your phone number, contacts, messages or passwords.</p>" +
+                "<h4>3. Why</h4><ul><li>To run the game, leaderboard and friend system.</li><li>To protect the leaderboard from bots and cheating.</li><li>To send messages in the bot — you can turn them off by stopping the bot.</li></ul>" +
+                "<h4>4. What other players see</h4><p>Only your Telegram first name and your score. Your Telegram ID and username are never shown.</p>" +
+                "<h4>5. We don't sell data</h4><p>We don't sell or share your data with ad networks and use no third-party trackers. Disclosure happens only on a lawful request from authorities.</p>" +
+                "<h4>6. Your rights</h4><p>You can ask to see, correct or delete your data — write to " + a.contact + ". We reply within 30 days.</p>" +
+                "<h4>7. Security</h4><p>All connections are encrypted. Every game request is verified with Telegram's digital signature, so nobody can pretend to be another player.</p>" +
+                "<h4>8. Changes</h4><p>We announce significant changes in the bot and the @ggsnakeofficial channel.</p>";
             },
             fair: function (a) {
                 return "" +
-                "<p class='lead'>A giveaway is fair only when everyone plays by the same rules. Here's how we make sure of it — and how to protect yourself.</p>" +
+                "<p class='lead'>A leaderboard is fair only when everyone plays by the same rules. Here's how we make sure of it — and how to protect yourself.</p>" +
                 "<h4>How every game is checked</h4><ul>" +
                 "<li>The server gives every ranked game its own random seed, so food positions can't be predicted in advance.</li>" +
                 "<li>After the game the server replays it move by move and calculates the score itself. The number your phone sends doesn't matter.</li>" +
                 "<li>A game played faster than the snake's real speed allows is rejected.</li>" +
                 "<li>Each game can be submitted only once, and rate limits apply.</li>" +
                 "<li>Friend points are held for " + a.h + " hours. Unusually fast growth in friends is reviewed manually.</li>" +
-                "<li>Winners' game records and friend lists are reviewed by hand before payout.</li></ul>" +
+                "<li>Top players' results are additionally reviewed by hand.</li></ul>" +
                 "<h4>Not allowed</h4><ul>" +
                 "<li>Bots, scripts, auto-clickers, input emulators.</li>" +
                 "<li>Modified game code, tampered requests, exploiting bugs.</li>" +
                 "<li>Several accounts per person, buying or transferring accounts, playing for someone else.</li>" +
                 "<li>Fake friends: bot farms, bought clicks, pushing people to join without playing.</li></ul>" +
-                "<h4>Consequences</h4><p>Results and points are voided, the account is excluded from the giveaway and removed from the leaderboard. Points earned through banned “friends” are removed automatically.</p>" +
+                "<h4>Consequences</h4><p>Results and points are voided and the account is removed from the leaderboard. Points earned through banned “friends” are removed automatically.</p>" +
                 "<h4>Protect yourself from scammers</h4><ul>" +
                 "<li>The only official bot is <b>@ggsnake_game_bot</b>. Check the username, not the name or avatar.</li>" +
-                "<li>We never ask for payment to receive a prize, passwords, SMS or Telegram codes, seed phrases or wallet access.</li>" +
-                "<li>We don't message first from personal accounts and never send you to other websites to “claim a prize”.</li>" +
+                "<li>We never ask for payment, passwords, SMS or Telegram codes, seed phrases or wallet access.</li>" +
+                "<li>We don't message first from personal accounts and never send you to other websites. Support is only @ggsnakeadm.</li>" +
                 "<li>Got a suspicious message in GGSNAKE's name? Don't reply and tell us: " + a.contact + ".</li></ul>" +
                 "<h4>Found a bug or vulnerability?</h4><p>Report it to " + a.contact + " and don't use it on the leaderboard. The first person to report a significant vulnerability gets a shout-out in the channel.</p>";
             }

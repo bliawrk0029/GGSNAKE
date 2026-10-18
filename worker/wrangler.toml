@@ -18,6 +18,8 @@ BOT_USERNAME = "ggsnake_game_bot"
 APP_SHORT_NAME = "play"
 # Contest settings (UTC). Change the end date before launch.
 CONTEST_END = "2026-10-31T18:00:00Z"
+# Giveaway is announced later: set GIVEAWAY = "1" to show the prize pool in the game and bot
+GIVEAWAY = "0"
 PRIZE_POOL = "1000"
 PRIZE_CURRENCY = "USDT"
 PRIZES_SCORE = "300,150,75,40,35"

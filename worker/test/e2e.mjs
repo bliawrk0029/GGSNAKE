@@ -27,7 +27,7 @@ const env = {
     DB: d1(sqlite), BOT_TOKEN, ADMIN_KEY: "admin-key-1234567890", WEBHOOK_SECRET: "hook-secret",
     ALLOWED_ORIGIN: "https://bliawrk0029.github.io", BOT_USERNAME: "ggsnake_game_bot", APP_SHORT_NAME: "play",
     APP_URL: "https://bliawrk0029.github.io/GGSNAKE/", CONTEST_END: "2026-11-30T18:00:00Z",
-    PRIZE_POOL: "1000", PRIZES_SCORE: "300,150,75,40,35", PRIZES_REF: "200,100,50,25,25",
+    GIVEAWAY: "1", PRIZE_POOL: "1000", PRIZES_SCORE: "300,150,75,40,35", PRIZES_REF: "200,100,50,25,25",
     REF_MIN_GAMES: "5", REF_MIN_DAYS: "2", REF_LOYAL_DAY: "7", REF_HOLD_HOURS: "24", REF_DAILY_CAP: "15", REF_OWNER_MIN_GAMES: "5"
 };
 

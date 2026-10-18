@@ -225,7 +225,8 @@ function contestInfo(env) {
     return {
         endsAt: env.CONTEST_END || null,
         over: contestOver(env),
-        pool: Number(env.PRIZE_POOL || 0),
+        // Prize pool stays hidden (0) until the giveaway is announced: GIVEAWAY = "1"
+        pool: env.GIVEAWAY === "1" ? Number(env.PRIZE_POOL || 0) : 0,
         currency: env.PRIZE_CURRENCY || "USDT",
         prizesScore: intList(env.PRIZES_SCORE),
         prizesRef: intList(env.PRIZES_REF),
@@ -516,8 +517,8 @@ const BOT_TEXT = {
             (c.pool ? `\n🏆 <b>Сезон 1 — $${c.pool} ${c.currency}</b>\nРекорди: ${c.prizesScore.join(" · ")}\nДрузі: ${c.prizesRef.join(" · ")}\n` : "") +
             "\nТисни «Грати» 👇",
         play: "🎮 Грати", channel: "📢 Канал", rules: "📜 Правила",
-        rulesText: "📜 Повні правила розіграшу, політика конфіденційності та «Чесна гра і безпека» — у грі: Профіль → ⚙ → Правила.\n\n🔒 Ми ніколи не просимо оплату за приз, паролі, коди чи seed-фрази. Офіційний бот — лише @{bot}.",
-        help: "Потрібна допомога? Напишіть {contact}.\n\nКоманди:\n/start — грати\n/rules — правила розіграшу\n/help — допомога"
+        rulesText: "📜 «Чесна гра і безпека» та політика конфіденційності — у грі: Профіль → ⚙.\n\n🔒 Ми ніколи не просимо оплату, паролі, коди чи seed-фрази. Офіційний бот — лише @{bot}.",
+        help: "Потрібна допомога? Напишіть {contact}.\n\nКоманди:\n/start — грати\n/rules — правила і безпека\n/help — допомога"
     },
     ru: {
         start: (c) => "🐍 <b>GGSNAKE</b> — та самая классическая змейка с кнопочного телефона, теперь в Telegram.\n\n" +
@@ -525,8 +526,8 @@ const BOT_TEXT = {
             (c.pool ? `\n🏆 <b>Сезон 1 — $${c.pool} ${c.currency}</b>\nРекорды: ${c.prizesScore.join(" · ")}\nДрузья: ${c.prizesRef.join(" · ")}\n` : "") +
             "\nЖми «Играть» 👇",
         play: "🎮 Играть", channel: "📢 Канал", rules: "📜 Правила",
-        rulesText: "📜 Полные правила розыгрыша, политика конфиденциальности и «Честная игра и безопасность» — в игре: Профиль → ⚙ → Правила.\n\n🔒 Мы никогда не просим оплату за приз, пароли, коды или seed-фразы. Официальный бот — только @{bot}.",
-        help: "Нужна помощь? Напишите {contact}.\n\nКоманды:\n/start — играть\n/rules — правила розыгрыша\n/help — помощь"
+        rulesText: "📜 «Честная игра и безопасность» и политика конфиденциальности — в игре: Профиль → ⚙.\n\n🔒 Мы никогда не просим оплату, пароли, коды или seed-фразы. Официальный бот — только @{bot}.",
+        help: "Нужна помощь? Напишите {contact}.\n\nКоманды:\n/start — играть\n/rules — правила и безопасность\n/help — помощь"
     },
     en: {
         start: (c) => "🐍 <b>GGSNAKE</b> — the classic snake from your old button phone, now in Telegram.\n\n" +
@@ -534,8 +535,8 @@ const BOT_TEXT = {
             (c.pool ? `\n🏆 <b>Season 1 — $${c.pool} ${c.currency}</b>\nHigh scores: ${c.prizesScore.join(" · ")}\nFriends: ${c.prizesRef.join(" · ")}\n` : "") +
             "\nTap “Play” 👇",
         play: "🎮 Play", channel: "📢 Channel", rules: "📜 Rules",
-        rulesText: "📜 Full giveaway rules, privacy policy and “Fair play & security” are in the game: Profile → ⚙ → Rules.\n\n🔒 We never ask for payment to receive a prize, passwords, codes or seed phrases. The only official bot is @{bot}.",
-        help: "Need help? Message {contact}.\n\nCommands:\n/start — play\n/rules — giveaway rules\n/help — help"
+        rulesText: "📜 “Fair play & security” and the privacy policy are in the game: Profile → ⚙.\n\n🔒 We never ask for payment, passwords, codes or seed phrases. The only official bot is @{bot}.",
+        help: "Need help? Message {contact}.\n\nCommands:\n/start — play\n/rules — rules & security\n/help — help"
     }
 };
 const botLang = code => { code = String(code || "").slice(0, 2); return code === "uk" || code === "ru" ? code : code === "be" ? "ru" : "en"; };
@@ -607,7 +608,7 @@ async function admin(req, env, url) {
             commands: await tgCall(env, "setMyCommands", {
                 commands: [
                     { command: "start", description: "Play GGSNAKE" },
-                    { command: "rules", description: "Giveaway rules" },
+                    { command: "rules", description: "Rules & security" },
                     { command: "help", description: "Help & support" }
                 ]
             }),
@@ -615,7 +616,7 @@ async function admin(req, env, url) {
                 language_code: "uk",
                 commands: [
                     { command: "start", description: "Грати в GGSNAKE" },
-                    { command: "rules", description: "Правила розіграшу" },
+                    { command: "rules", description: "Правила і безпека" },
                     { command: "help", description: "Допомога і підтримка" }
                 ]
             }),
@@ -623,7 +624,7 @@ async function admin(req, env, url) {
                 language_code: "ru",
                 commands: [
                     { command: "start", description: "Играть в GGSNAKE" },
-                    { command: "rules", description: "Правила розыгрыша" },
+                    { command: "rules", description: "Правила и безопасность" },
                     { command: "help", description: "Помощь и поддержка" }
                 ]
             })
