@@ -585,6 +585,17 @@
               ach_7d_d: "7 gün üst üste oyna.", ach_ref3_d: "Gerçekten oynayan 3 arkadaş davet et.", ach_wrap_d: "Yılanın duvarlardan geçtiği Antrenman modunda oyna." }
     };
     for (var l3 in UI3) for (var k3 in UI3[l3]) D[l3][k3] = UI3[l3][k3];
+    var UI4 = {
+        uk: { podium_title: "ТОП-3", pod_free: "вільне місце", rh_title: "Твій найкращий результат", rh_place: "Ти #{n} у таблиці", rank_next_short: "До «{r}» ще {n}" },
+        en: { podium_title: "TOP 3", pod_free: "free spot", rh_title: "Your best result", rh_place: "You're #{n} on the board", rank_next_short: "{n} more to «{r}»" },
+        ru: { podium_title: "ТОП-3", pod_free: "свободно", rh_title: "Твой лучший результат", rh_place: "Ты #{n} в таблице", rank_next_short: "До «{r}» ещё {n}" },
+        es: { podium_title: "TOP 3", pod_free: "libre", rh_title: "Tu mejor resultado", rh_place: "Eres #{n} en la tabla", rank_next_short: "Faltan {n} para «{r}»" },
+        pt: { podium_title: "TOP 3", pod_free: "livre", rh_title: "Seu melhor resultado", rh_place: "Você é #{n} na tabela", rank_next_short: "Faltam {n} para «{r}»" },
+        de: { podium_title: "TOP 3", pod_free: "frei", rh_title: "Dein bestes Ergebnis", rh_place: "Du bist #{n} in der Tabelle", rank_next_short: "Noch {n} bis «{r}»" },
+        pl: { podium_title: "TOP 3", pod_free: "wolne", rh_title: "Twój najlepszy wynik", rh_place: "Jesteś #{n} w tabeli", rank_next_short: "Do «{r}» jeszcze {n}" },
+        tr: { podium_title: "İLK 3", pod_free: "boş", rh_title: "En iyi sonucun", rh_place: "Tabloda #{n}", rank_next_short: "«{r}» için {n} kaldı" }
+    };
+    for (var l4 in UI4) for (var k4 in UI4[l4]) D[l4][k4] = UI4[l4][k4];
     var FAIR = {"uk": "Чесна гра і безпека", "en": "Fair play & security", "ru": "Честная игра и безопасность", "es": "Juego limpio y seguridad", "pt": "Jogo limpo e segurança", "de": "Fair Play & Sicherheit", "pl": "Uczciwa gra i bezpieczeństwo", "tr": "Adil oyun ve güvenlik"};
     for (var lf in FAIR) D[lf].fair_title = FAIR[lf];
     D.uk.privacy = "Конфіденційність"; D.uk.privacy_title = "Політика конфіденційності"; D.en.privacy_title = "Privacy policy"; D.ru.privacy_title = "Политика конфиденциальности";

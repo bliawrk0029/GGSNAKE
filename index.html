@@ -9,7 +9,7 @@
 <script>
 /* Telegram keeps an old copy of the page. Compare with version.json (never cached) and reload once if newer. */
 (function () {
-    var V = "20261018-2";
+    var V = "20261018-3";
     window.GG_VERSION = V;
     try {
         fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (j) {
@@ -27,8 +27,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=VT323&family=Unbounded:wght@700;900&family=Manrope:wght@500;600;700;800&family=Jersey+10&family=Caveat:wght@700&family=Silkscreen&display=swap" rel="stylesheet">
-<script src="engine.js?v=20261018-2"></script>
-<script src="i18n.js?v=20261018-2"></script>
+<script src="engine.js?v=20261018-3"></script>
+<script src="i18n.js?v=20261018-3"></script>
 <style>
 :root {
     --vh: 100vh;
@@ -544,6 +544,45 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-in
 .ach-st { font-family: "VT323", monospace; font-size: 22px; color: var(--muted); min-width: 44px; text-align: right; }
 .ach-row.on .ach-st { color: var(--accent); }
 .giveaway-only { display: none; }
+/* ---------- Rating v3: brighter ---------- */
+.rank-hero { display: flex; align-items: center; gap: 14px; overflow: hidden;
+    background: linear-gradient(135deg, rgba(195,230,127,.16) 0%, rgba(40,49,63,.75) 45%, rgba(24,30,40,.85) 100%) !important;
+    box-shadow: inset 0 0 0 1px rgba(195,230,127,.28), 0 10px 30px rgba(0,0,0,.3), 0 0 40px rgba(195,230,127,.08) !important; }
+.rank-hero::after { content: ""; position: absolute; right: -50px; top: -70px; width: 200px; height: 200px; border-radius: 50%; background: radial-gradient(rgba(195,230,127,.18), transparent 70%); pointer-events: none; }
+.rh-lcd { flex: none; width: 112px; border-radius: 14px; padding: 8px 6px 6px; text-align: center; }
+.rh-lcd > * { position: relative; z-index: 1; }
+.rh-lcd canvas { display: block; width: 44px; height: 32px; margin: 0 auto 2px; image-rendering: pixelated; animation: crownBob 1.6s steps(2) infinite; }
+.rh-lcd b { display: block; font-weight: 400; font-size: 40px; line-height: .85; letter-spacing: 1px; }
+.rh-lcd span { font-size: 15px; opacity: .8; }
+@keyframes crownBob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+.rh-info { flex: 1; min-width: 0; position: relative; z-index: 1; }
+.rh-info .rank-chip { display: inline-block; margin-bottom: 6px; }
+.rh-info b { display: block; font-size: 16px; line-height: 1.25; }
+.rh-info .bar { margin: 8px 0 5px; height: 8px; border-radius: 4px; }
+.rh-sub { display: block; font-size: 11px; color: #cfd8e3; }
+.podium-card h3 span:first-child { color: var(--gold); }
+.podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: end; gap: 8px; padding-top: 4px; }
+.pod { text-align: center; min-width: 0; }
+.pod .av { width: 44px; height: 44px; margin: 0 auto 6px; border-radius: 50%; display: grid; place-items: center; font-weight: 900; font-size: 18px; color: #172208; position: relative; }
+.pod.p1 .av { width: 54px; height: 54px; font-size: 22px; }
+.pod.p1 .av::before { content: ""; position: absolute; top: -16px; left: 50%; width: 22px; height: 14px; margin-left: -11px;
+    background: var(--gold); clip-path: polygon(0 100%, 0 20%, 25% 60%, 50% 0, 75% 60%, 100% 20%, 100% 100%); filter: drop-shadow(0 0 6px rgba(255,210,90,.6)); }
+.pod .nm { display: block; font-size: 12px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pod .sc { display: block; font-family: "VT323", monospace; font-size: 20px; color: var(--accent); line-height: 1; margin-bottom: 6px; }
+.pod .step { border-radius: 12px 12px 6px 6px; display: grid; place-items: center; font-family: "VT323", monospace; font-size: 34px; color: rgba(0,0,0,.55);
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.45), inset 0 -4px 0 rgba(0,0,0,.18), 0 6px 14px rgba(0,0,0,.35); }
+.pod.p1 .av, .pod.p1 .step { background: linear-gradient(180deg, #ffe58f, #ffd25a 50%, #c99a2e); }
+.pod.p2 .av, .pod.p2 .step { background: linear-gradient(180deg, #f2f6fa, #cfd8e3 50%, #95a3b3); }
+.pod.p3 .av, .pod.p3 .step { background: linear-gradient(180deg, #f6c79d, #e0a06a 50%, #a8642f); }
+.pod.p1 .step { height: 78px; } .pod.p2 .step { height: 56px; } .pod.p3 .step { height: 42px; }
+.pod.empty .av { background: rgba(255,255,255,.07) !important; color: var(--muted); border: 2px dashed rgba(255,255,255,.15); }
+.pod.empty .sc { color: var(--muted); }
+.board-card .rank.r1 { background: linear-gradient(180deg, #ffe58f, #ffd25a); color: #3a2a00; }
+.board-card .rank.r2 { background: linear-gradient(180deg, #f2f6fa, #cfd8e3); color: #26303a; }
+.board-card .rank.r3 { background: linear-gradient(180deg, #f6c79d, #e0a06a); color: #3b1f08; }
+.board-card .row.me { background: linear-gradient(90deg, rgba(195,230,127,.18), rgba(195,230,127,.04)); box-shadow: inset 0 0 0 1px rgba(195,230,127,.3); }
+.board-empty { text-align: center; padding: 14px 6px 8px; color: #cfd8e3; font-size: 13px; line-height: 1.5; }
+.board-empty canvas { display: block; width: 120px; height: 36px; margin: 0 auto 10px; image-rendering: pixelated; }
 </style>
 </head>
 <body>
@@ -641,6 +680,21 @@ body::after { content: ""; position: fixed; inset: 0; pointer-events: none; z-in
                     <div class="split"><b data-i18n="records">Рекорди</b> · <span data-i18n="top5">топ-5</span> · <em id="cScoreSum">$600</em></div>
                     <div class="split"><b data-i18n="friends">Друзі</b> · <span data-i18n="top5">топ-5</span> · <em id="cRefSum">$400</em></div>
                 </div>
+            </div>
+
+            <div class="card rank-hero">
+                <div class="lcd-mini rh-lcd"><canvas id="crownCv" width="11" height="8" aria-hidden="true"></canvas><b id="rhBest">0000</b><span data-i18n="lcd_record">РЕКОРД</span></div>
+                <div class="rh-info">
+                    <span class="rank-chip" id="rhRank"></span>
+                    <b id="rhTitle"></b>
+                    <div class="bar"><i id="rhBar"></i></div>
+                    <span class="rh-sub" id="rhSub"></span>
+                </div>
+            </div>
+
+            <div class="card podium-card">
+                <h3><span data-i18n="podium_title">ТОП-3</span><span class="h3v" id="podPeriod"></span></h3>
+                <div class="podium" id="podium"></div>
             </div>
 
             <div class="card board-card">
@@ -1345,8 +1399,45 @@ const boardKey = () => board + ":" + period;
 
 function money(v) { return "$" + v; }
 
+const CROWN = ["#....#....#", "##..###..##", "###.###.###", "###########", "##.##.##.##", "###########", "...........", "###########"];
+function renderHero(data) {
+    const best = Math.max(bestShown(), me ? me.best : 0);
+    const ri = rankIndex(best);
+    $("rhBest").textContent = pad(best, 4);
+    $("rhRank").textContent = tr(RANKS[ri][0]);
+    const mine = data && !data.error ? (data.rows.find(r => r.me) || data.me) : null;
+    $("rhTitle").textContent = mine && mine.rank ? tr("rh_place", { n: mine.rank }) : tr("rh_title");
+    if (ri < RANKS.length - 1) {
+        const next = RANKS[ri + 1][1], base = RANKS[ri][1];
+        $("rhBar").style.width = Math.round((best - base) / (next - base) * 100) + "%";
+        $("rhSub").textContent = tr("rank_next_short", { r: tr(RANKS[ri + 1][0]), n: next - best });
+    } else { $("rhBar").style.width = "100%"; $("rhSub").textContent = tr("rank_max"); }
+    drawSprite($("crownCv"), CROWN, "#1c2a0e");
+}
+function renderPodium(data) {
+    const ref = board === "ref";
+    $("podPeriod").textContent = tr({ day: "per_day", week: "per_week", season: "per_season" }[period]);
+    const rows = data && !data.error && data.rows ? data.rows : [];
+    const cell = (r, place) => r
+        ? `<div class="pod p${place}"><div class="av">${escapeHtml((r.name || "?")[0].toUpperCase())}</div><span class="nm">${escapeHtml(r.name)}</span><span class="sc">${ref ? fmtPts(r.value) : r.value}</span><div class="step">${place}</div></div>`
+        : `<div class="pod p${place} empty"><div class="av">?</div><span class="nm">${tr("pod_free")}</span><span class="sc">—</span><div class="step">${place}</div></div>`;
+    $("podium").innerHTML = cell(rows[1], 2) + cell(rows[0], 1) + cell(rows[2], 3);
+}
+function emptySnake() {
+    return '<div class="board-empty"><canvas id="emptySnake" width="40" height="12"></canvas>';
+}
+function drawEmptySnake() {
+    const cv = $("emptySnake"); if (!cv) return;
+    const c = cv.getContext("2d"); c.fillStyle = "#c3e67f";
+    const pts = [[1,9],[2,9],[3,9],[4,9],[5,9],[6,9],[7,9],[8,9],[8,8],[8,7],[8,6],[8,5],[9,5],[10,5],[11,5],[12,5],[13,5],[14,5],[15,5],[16,5],[16,6],[16,7],[16,8],[16,9],[17,9],[18,9],[19,9],[20,9],[21,9],[22,9],[23,9],[24,9],[25,9],[26,9]];
+    pts.forEach(p => c.fillRect(p[0], p[1], 1, 1));
+    c.fillRect(27, 8, 2, 2); c.fillRect(30, 8, 1, 1); c.fillRect(31, 7, 1, 1); c.fillRect(31, 9, 1, 1);
+    c.fillStyle = "#ffd25a"; [[35,7],[34,8],[36,8],[35,9]].forEach(p => c.fillRect(p[0], p[1], 1, 1));
+}
+
 function renderBoard() {
     const data = boardCache[boardKey()];
+    renderHero(data); renderPodium(data);
     const list = $("boardList");
     const ref = board === "ref";
     $("boardHint").textContent = ref ? tr("hint_ref_pts") : tr({ day: "hint_score_day", week: "hint_score_week", season: GIVEAWAY ? "hint_score" : "hint_score_plain" }[period]);
@@ -1357,8 +1448,10 @@ function renderBoard() {
         $("pinGoal").textContent = goal;
         $("pinBar").style.width = Math.max(0, Math.min(100, pct)) + "%";
     };
+    $("mePin").style.display = API_BASE ? "" : "none";
     if (!API_BASE) {
-        list.innerHTML = '<div class="empty">' + tr("board_local", { n: bestShown() }) + '</div>';
+        list.innerHTML = emptySnake() + tr("board_local", { n: bestShown() }) + '</div>';
+        drawEmptySnake();
         pin(null, ref ? 0 : bestShown(), ref ? tr("pin_no_rank_ref") : tr("pin_season_soon"), 0);
         return;
     }
