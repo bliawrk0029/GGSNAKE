@@ -14,17 +14,17 @@ Classic snake as a Telegram Mini App — global leaderboard, referrals and a pri
 3. On game over the client sends only the list of turns. The server replays the game and computes the score itself.
 4. A run that finishes faster than the game's own speed is rejected. One submission per session.
 5. Every request is signed by Telegram (`initData` HMAC with the bot token).
+6. Admin endpoints: key only in a header, 32+ chars; the webhook needs a 32+ char secret.
 
 ## Test
 ```
 node worker/test/e2e.mjs
 ```
 
-## Admin (replace KEY with ADMIN_KEY)
-- `GET  /admin/setup?key=KEY` — set bot webhook, menu button, commands
-- `GET  /admin/stats?key=KEY` — players, games, referrals
-- `GET  /admin/winners?key=KEY` — current prize places
-- `GET  /admin/user?key=KEY&id=TG_ID` — player, best runs, invited friends
-- `GET  /admin/run?key=KEY&id=RUN_ID` — stored run + server re-verification
-- `POST /admin/ban?key=KEY&id=TG_ID` (`&banned=0` to unban)
-- `POST /admin/reset-season?key=KEY&confirm=yes` — wipe scores before launch
+## Admin
+Admin endpoints accept the key **only** in the `X-Admin-Key` header (never in the URL), and only if it is 32+ characters. They send no CORS headers, so no web page can call them.
+
+On Windows use the helper — it asks for the key and never saves it:
+```
+.\tools\admin.ps1 stats | winners | setup | user ID | run ID | ban ID | unban ID | reset-season
+```

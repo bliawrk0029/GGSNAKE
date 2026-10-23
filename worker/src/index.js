@@ -9,8 +9,11 @@
  *    replays the whole game with the shared engine to compute the score.
  *  - Runs faster than the game's own speed are rejected.
  *  - Rate limits on game starts; payload size limits; parameterised SQL.
- *  - Admin endpoints require ADMIN_KEY; the bot webhook requires the
- *    Telegram secret token header.
+ *  - Admin endpoints require ADMIN_KEY (32+ chars) in the X-Admin-Key
+ *    header — never in the URL, so it does not end up in browser history
+ *    or request logs. The bot webhook requires the Telegram secret token
+ *    header (32+ chars). Admin endpoints never send CORS headers, so no
+ *    web page can call them from a browser.
  */
 import "../../engine.js";
 import { SCHEMA } from "./schema.js";
@@ -41,7 +44,10 @@ function json(data, status, headers) {
         headers: Object.assign({
             "Content-Type": "application/json; charset=utf-8",
             "Cache-Control": "no-store",
-            "X-Content-Type-Options": "nosniff"
+            "X-Content-Type-Options": "nosniff",
+            "Referrer-Policy": "no-referrer",
+            "X-Frame-Options": "DENY",
+            "Strict-Transport-Security": "max-age=31536000; includeSubDomains"
         }, headers || {})
     });
 }
@@ -543,7 +549,7 @@ const botLang = code => { code = String(code || "").slice(0, 2); return code ===
 
 async function botWebhook(req, env) {
     const secret = req.headers.get("X-Telegram-Bot-Api-Secret-Token") || "";
-    if (!env.WEBHOOK_SECRET || !safeEqual(secret, env.WEBHOOK_SECRET)) return new Response("forbidden", { status: 403 });
+    if (!env.WEBHOOK_SECRET || env.WEBHOOK_SECRET.length < MIN_SECRET_LEN || !safeEqual(secret, env.WEBHOOK_SECRET)) return new Response("forbidden", { status: 403 });
 
     let update;
     try { update = await req.json(); } catch { return new Response("ok"); }
@@ -581,15 +587,17 @@ async function botWebhook(req, env) {
 /* Admin                                                               */
 /* ------------------------------------------------------------------ */
 
-function requireAdmin(url, env) {
-    const key = url.searchParams.get("key") || "";
-    if (!env.ADMIN_KEY || env.ADMIN_KEY.length < 16 || !safeEqual(key, env.ADMIN_KEY)) {
+const MIN_SECRET_LEN = 32;
+
+function requireAdmin(req, env) {
+    const key = req.headers.get("X-Admin-Key") || "";
+    if (!env.ADMIN_KEY || env.ADMIN_KEY.length < MIN_SECRET_LEN || !safeEqual(key, env.ADMIN_KEY)) {
         throw new HttpError(403, "forbidden");
     }
 }
 
 async function admin(req, env, url) {
-    requireAdmin(url, env);
+    requireAdmin(req, env);
     const db = env.DB;
     const path = url.pathname;
 

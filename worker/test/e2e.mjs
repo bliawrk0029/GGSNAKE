@@ -23,8 +23,9 @@ function d1(sqlite) {
 const sqlite = new DatabaseSync(":memory:");
 
 const BOT_TOKEN = "123456:TEST_TOKEN_abc";
+const ADMIN = "admin-key-0123456789abcdefghijklmnop";
 const env = {
-    DB: d1(sqlite), BOT_TOKEN, ADMIN_KEY: "admin-key-1234567890", WEBHOOK_SECRET: "hook-secret",
+    DB: d1(sqlite), BOT_TOKEN, ADMIN_KEY: ADMIN, WEBHOOK_SECRET: "hook-secret-0123456789abcdefghijklmnop",
     ALLOWED_ORIGIN: "https://bliawrk0029.github.io", BOT_USERNAME: "ggsnake_game_bot", APP_SHORT_NAME: "play",
     APP_URL: "https://bliawrk0029.github.io/GGSNAKE/", CONTEST_END: "2026-11-30T18:00:00Z",
     GIVEAWAY: "1", PRIZE_POOL: "1000", PRIZES_SCORE: "300,150,75,40,35", PRIZES_REF: "200,100,50,25,25",
@@ -40,8 +41,9 @@ function initData(user, startParam, token = BOT_TOKEN) {
     return new URLSearchParams(p).toString();
 }
 
-async function call(method, path, { id, body, start, raw } = {}) {
+async function call(method, path, { id, body, start, raw, admin } = {}) {
     const headers = { Origin: "https://bliawrk0029.github.io", "Content-Type": "application/json" };
+    if (admin) headers["X-Admin-Key"] = admin;
     if (raw) headers["X-Init-Data"] = raw;
     else if (id) headers["X-Init-Data"] = initData({ id, first_name: "User" + id, username: "u" + id }, start);
     const res = await worker.fetch(new Request("https://api.test" + path, { method, headers, body: body ? JSON.stringify(body) : undefined }), env);
@@ -187,15 +189,21 @@ check("week board sorted", lbwk.data.rows.every((r, i, a) => !i || a[i - 1].valu
 console.log("Bot + admin");
 const hookBad = await worker.fetch(new Request("https://api.test/tg/webhook", { method: "POST", body: "{}" }), env);
 check("webhook without secret → 403", hookBad.status === 403);
+const shortEnv = Object.assign({}, env, { ADMIN_KEY: "short-key-123456", WEBHOOK_SECRET: "short" });
+const shortAdmin = await worker.fetch(new Request("https://api.test/admin/stats", { headers: { "X-Admin-Key": "short-key-123456" } }), shortEnv);
+check("admin key shorter than 32 → admin disabled", shortAdmin.status === 403);
 check("admin without key → 403", (await call("GET", "/admin/winners")).status === 403);
-const w = await call("GET", "/admin/winners?key=admin-key-1234567890");
+check("admin key in URL is ignored → 403", (await call("GET", "/admin/winners?key=" + ADMIN)).status === 403);
+check("wrong admin key → 403", (await call("GET", "/admin/winners", { admin: ADMIN.slice(0, -1) + "x" })).status === 403);
+const w = await call("GET", "/admin/winners", { admin: ADMIN });
+check("admin response has no CORS header", !w.headers.get("Access-Control-Allow-Origin"));
 check("winners list with prizes", w.status === 200 && w.data.score[0].prize === 300 && w.data.ref[0].prize === 200, w.data);
-const ban = await call("POST", "/admin/ban?key=admin-key-1234567890&id=200");
+const ban = await call("POST", "/admin/ban?id=200", { admin: ADMIN });
 check("ban revokes points earned through that friend", ban.status === 200 && pts(100) === 0.5, pts(100));
 const lb2 = await call("GET", "/api/leaderboard?board=score");
 check("banned user hidden from board", !lb2.data.rows.some(r => r.name === "User200"));
 const runId = sqlite.prepare("SELECT id FROM runs ORDER BY score DESC LIMIT 1").get().id;
-const rv = await call("GET", "/admin/run?key=admin-key-1234567890&id=" + runId);
+const rv = await call("GET", "/admin/run?id=" + runId, { admin: ADMIN });
 check("stored run re-verifies", rv.data.verify.ok && rv.data.verify.score === rv.data.run.score);
 
 console.log("Contest over");

@@ -1,0 +1,12 @@
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  Content-Security-Policy: frame-ancestors 'self' https://web.telegram.org https://*.telegram.org
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+
+/version.json
+  Cache-Control: no-store
+
+/index.html
+  Cache-Control: no-cache
