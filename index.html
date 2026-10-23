@@ -11,7 +11,7 @@
 <script>
 /* Telegram keeps an old copy of the page. Compare with version.json (never cached) and reload once if newer. */
 (function () {
-    var V = "20261018-3";
+    var V = "20261023-1";
     window.GG_VERSION = V;
     try {
         fetch("version.json?t=" + Date.now(), { cache: "no-store" }).then(function (r) { return r.json(); }).then(function (j) {
